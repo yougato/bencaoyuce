@@ -88,6 +88,8 @@ canvas.grabbing{cursor:grabbing}
 .btn-run{height:40px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#f0b429,#d98c10);color:#241703;font-size:13px;font-weight:700;font-family:inherit;letter-spacing:.5px;transition:.2s;margin-top:4px}
 .btn-run:hover:not(:disabled){filter:brightness(1.12);transform:translateY(-1px)}
 .btn-run:disabled{opacity:.45;cursor:not-allowed}
+.btn-run.alt{background:linear-gradient(135deg,#f472b6,#be185d);color:#fff}
+.btn-run.alt:hover:not(:disabled){filter:brightness(1.15)}
 .ai-out{font-size:12.5px;line-height:1.75;color:#c9d5e4;border-top:1px solid var(--border);padding-top:14px}
 .ai-out h1,.ai-out h2,.ai-out h3{font-size:13px;color:var(--gold);margin:16px 0 8px;font-weight:700}
 .ai-out h1:first-child,.ai-out h2:first-child,.ai-out h3:first-child{margin-top:0}
@@ -142,7 +144,7 @@ canvas.grabbing{cursor:grabbing}
 .cmp-card{padding:14px 15px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:11px;transition:.2s}
 .cmp-card:hover{border-color:rgba(167,139,250,.3);background:rgba(255,255,255,.05)}
 .cmp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;gap:10px}
-.cmp-name-wrap{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
+.cmp-name-wrap{display:flex;align-items:center;gap:7px;min-width:0;flex:1;flex-wrap:wrap}
 .cmp-rank{width:19px;height:19px;border-radius:6px;background:rgba(167,139,250,.2);color:#c4b5fd;font-size:10px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
 .cmp-name{font-size:14.5px;font-weight:700;color:#fff;cursor:pointer;transition:.15s}
 .cmp-name:hover{color:#c4b5fd}
@@ -171,6 +173,68 @@ canvas.grabbing{cursor:grabbing}
 .cmp-text b.sim{color:#5eead4}
 .cmp-text b.dif{color:#fcd34d}
 .cmp-summary{margin-top:9px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.08);color:#c4b5fd;font-style:italic;font-size:12px;line-height:1.6}
+
+/* ===== 加减法卡片 ===== */
+.math-section{margin-bottom:16px}
+.math-title{font-size:11px;color:#a78bfa;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:7px;padding-bottom:7px;border-bottom:1px solid rgba(167,139,250,.18)}
+.math-title::before{content:"◈";font-size:10px}
+.math-title.add{color:#5eead4}
+.math-title.add::before{content:"＋";font-size:13px}
+.math-title.sub{color:#f472b6}
+.math-title.sub::before{content:"－";font-size:13px}
+
+.math-card{padding:14px 15px;border-radius:12px;margin-bottom:11px;transition:.2s}
+.math-card.add{background:linear-gradient(135deg,rgba(45,212,191,.07),rgba(45,212,191,.02));border:1px solid rgba(45,212,191,.22)}
+.math-card.add:hover{border-color:rgba(45,212,191,.45);background:linear-gradient(135deg,rgba(45,212,191,.11),rgba(45,212,191,.03))}
+.math-card.sub{background:linear-gradient(135deg,rgba(244,114,182,.07),rgba(244,114,182,.02));border:1px solid rgba(244,114,182,.22)}
+.math-card.sub:hover{border-color:rgba(244,114,182,.45);background:linear-gradient(135deg,rgba(244,114,182,.11),rgba(244,114,182,.03))}
+
+.math-eq{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:11px 8px;background:rgba(0,0,0,.22);border-radius:9px;margin-bottom:11px}
+.math-pill{padding:6px 12px;border-radius:8px;font-size:12.5px;font-weight:700;background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.1);white-space:nowrap;transition:.15s;cursor:pointer}
+.math-pill:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.25)}
+.math-pill.plus{background:rgba(45,212,191,.18);border-color:rgba(45,212,191,.4);color:#5eead4}
+.math-pill.minus{background:rgba(244,114,182,.18);border-color:rgba(244,114,182,.4);color:#f472b6}
+.math-pill.eq{background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.4);color:#c4b5fd}
+.math-pill.result{background:linear-gradient(135deg,rgba(240,180,41,.22),rgba(240,180,41,.1));border-color:rgba(240,180,41,.5);color:#f0b429;font-weight:800}
+.math-op{font-size:17px;font-weight:800;color:#8595a8;padding:0 2px}
+.math-op.p{color:#5eead4}
+.math-op.m{color:#f472b6}
+.math-op.e{color:#c4b5fd}
+
+.math-cover{display:flex;align-items:center;gap:9px;margin-bottom:11px;padding:8px 11px;background:rgba(255,255,255,.035);border-radius:8px}
+.math-cover-label{font-size:11px;color:#8595a8;flex-shrink:0}
+.math-cover-bar{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden}
+.math-cover-bar i{display:block;height:100%;border-radius:3px;transition:width .5s ease}
+.math-card.add .math-cover-bar i{background:linear-gradient(90deg,#2dd4bf,#0d9488)}
+.math-card.sub .math-cover-bar i{background:linear-gradient(90deg,#f472b6,#be185d)}
+.math-cover-val{font-size:14px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;flex-shrink:0;line-height:1}
+
+.math-reason{font-size:12px;line-height:1.7;color:#b9c6d6;margin-bottom:10px}
+.math-reason b{color:#fff;font-weight:600}
+.math-reason b.s{color:#5eead4}
+.math-reason b.d{color:#f9a8d4}
+
+.math-detail{padding:9px 11px;background:rgba(0,0,0,.18);border-radius:8px;margin-bottom:10px;font-size:11.5px;line-height:1.65;color:#9aa9bb}
+.math-detail b{color:#e8eef7;font-weight:600}
+
+.math-herbs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.math-herb-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:11.5px;color:#c9d5e4;transition:.15s;cursor:default}
+.math-herb-chip .mh-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.math-herb-chip .mh-fam{font-size:10px;color:#5d6b7d}
+.math-card.add .math-herb-chip{border-color:rgba(45,212,191,.2)}
+.math-card.sub .math-herb-chip{border-color:rgba(244,114,182,.2)}
+.math-herb-chip.missing{border-style:dashed;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.06)}
+.math-herb-chip.missing .mh-name{color:#fcd34d}
+
+.math-actions{display:flex;gap:7px;flex-wrap:wrap}
+.math-btn{font-size:11px;padding:6px 12px;border-radius:7px;border:1px solid;cursor:pointer;font-family:inherit;font-weight:700;transition:.15s;white-space:nowrap}
+.math-btn.add{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.35);color:#5eead4}
+.math-btn.add:hover:not(:disabled){background:rgba(45,212,191,.25);color:#a7f3d0}
+.math-btn.all{background:rgba(240,180,41,.12);border-color:rgba(240,180,41,.4);color:#f0b429}
+.math-btn.all:hover:not(:disabled){background:rgba(240,180,41,.25)}
+.math-btn:disabled{opacity:.4;cursor:not-allowed}
+.math-note{font-size:11px;color:#6b7a8d;padding:8px 10px;background:rgba(255,255,255,.02);border-radius:7px;line-height:1.6;margin-top:9px}
+.math-note b{color:#fcd34d;font-weight:600}
 
 .img-upload{margin-bottom:16px;padding:12px;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);border-radius:11px}
 .img-upload-title{font-size:10.5px;color:#7dd3fc;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:6px}
@@ -254,7 +318,7 @@ canvas.grabbing{cursor:grabbing}
 .modal-foot .confirm:disabled{opacity:.4;cursor:not-allowed}
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(14px);background:rgba(20,28,40,.96);border:1px solid var(--border);color:#d4e0ee;padding:10px 20px;border-radius:11px;font-size:12.5px;z-index:200;backdrop-filter:blur(16px);opacity:0;transition:.3s;pointer-events:none;box-shadow:0 10px 34px rgba(0,0,0,.5)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(max-width:900px){.side{right:8px;left:8px;width:auto;top:70px;bottom:8px}.legend{display:none}.brand p{display:none}.tools button.import,.tools button.io{width:36px;padding:0;font-size:15px}.tools button .txt{display:none}.modal{width:94vw}.cmp-dims{grid-template-columns:1fr}}
+@media(max-width:900px){.side{right:8px;left:8px;width:auto;top:70px;bottom:8px}.legend{display:none}.brand p{display:none}.tools button.import,.tools button.io{width:36px;padding:0;font-size:15px}.tools button .txt{display:none}.modal{width:94vw}.cmp-dims{grid-template-columns:1fr}.math-eq{gap:5px}.math-pill{font-size:11.5px;padding:5px 9px}}
 </style>
 </head>
 <body>
@@ -316,19 +380,20 @@ canvas.grabbing{cursor:grabbing}
       </div>
       <label>对比范围</label>
       <div class="model-switch">
-        <button class="cm active" data-cmode="local" title="只对比应用内已有药物">📚 应用内</button>
-        <button class="cm" data-cmode="extended" title="应用内候选 + AI从药典扩展">🔗 扩展</button>
-        <button class="cm" data-cmode="ai" title="完全由AI从药典全库推荐">🌐 药典全库</button>
+        <button class="cm active" data-cmode="local">📚 应用内</button>
+        <button class="cm" data-cmode="extended">🔗 扩展</button>
+        <button class="cm" data-cmode="ai">🌐 药典全库</button>
       </div>
       <label>API Key</label>
       <input type="password" id="apiKey" placeholder="粘贴你的 API Key">
       <label>代理地址（可选，解决跨域）</label>
       <input type="text" id="proxyUrl" placeholder="https://your-proxy.com/v1">
       <button class="btn-run" id="runAI">🔍 与相似药物对比</button>
-      <div class="hint">应用内：仅对比本图谱已有药物；扩展：本图谱 + AI从药典推荐；药典全库：完全由AI从《中国药典》2020年版收录中药中推荐相似药物。相似药物可一键添加到图谱。</div>
+      <button class="btn-run alt" id="runMath" style="margin-top:6px">⚖️ 加减法分析（替代 / 相减）</button>
+      <div class="hint">相似对比：找相似药物；加减法分析：① 加法 = 用哪几味药组合可替代目标药；② 减法 = 目标药减去某味药后等效于哪味药。结果中药物可一键添加到图谱。</div>
     </div>
     <div class="ai-out" id="aiOut">
-      <div class="empty">选中一味药后<br>查看它与数据库中相似药物的对比</div>
+      <div class="empty">选中一味药后<br>使用上方按钮进行分析</div>
     </div>
   </div>
 </aside>
@@ -345,14 +410,7 @@ canvas.grabbing{cursor:grabbing}
         <button class="pm active" data-mode="rule">⚡ 快速规则解析</button>
         <button class="pm" data-mode="ai">🤖 AI 智能解析（推荐）</button>
       </div>
-      <textarea id="importText" placeholder="在此粘贴从药典网站复制的药物正文…
-
-示例：
-延胡索
-本品为罂粟科植物延胡索Corydalis yanhusuo W. T. Wang的干燥块茎。
-〖性味与归经〗 辛、苦，温。归肝、脾经。
-〖功能与主治〗 活血，行气，止痛。用于胸胁、脘腹疼痛，胸痹心痛，经闭痛经，产后瘀阻，跌扑肿痛。
-〖含量测定〗 本品按干燥品计算，含延胡索乙素（C₂₁H₂₅NO₄）不得少于0.050%。"></textarea>
+      <textarea id="importText" placeholder="在此粘贴从药典网站复制的药物正文…"></textarea>
       <div class="name-row" id="nameRow" style="margin-top:12px">
         <label>药物名称</label>
         <input type="text" id="manualName" placeholder="解析不出药名时请手动输入">
@@ -437,6 +495,7 @@ const SX=400,SY=400,COLS=7;
 const imageState={dataUrl:'',name:'',size:0,width:0,height:0};
 let compareMode='local';
 let lastComparisonData=null;
+let lastMathData=null;
 
 function getPos(i,total){const rows=Math.max(1,Math.ceil(total/COLS));const ox=-(COLS-1)/2*SX;const oy=-(rows-1)/2*SY;return{x:ox+(i%COLS)*SX,y:oy+Math.floor(i/COLS)*SY};}
 function addHerbToGraph(h,index,total){
@@ -644,13 +703,11 @@ function selectNode(n){
     if(n&&n.type==='herb'){
       aiOut.innerHTML='<div class="empty" style="padding:30px 10px">'+
         '<div style="font-size:13px;color:#f0b429;font-weight:600;margin-bottom:8px">'+n.data.name+'</div>'+
-        '点击上方「🔍 与相似药物对比」按钮<br>当前对比范围：<b style="color:#7dd3fc">'+getCompareModeLabel()+'</b></div>';
+        '点击上方按钮开始分析<br>对比范围：<b style="color:#7dd3fc">'+getCompareModeLabel()+'</b></div>';
     }
   }
 }
-function getCompareModeLabel(){
-  return compareMode==='local'?'📚 应用内':compareMode==='extended'?'🔗 扩展':'🌐 药典全库';
-}
+function getCompareModeLabel(){return compareMode==='local'?'📚 应用内':compareMode==='extended'?'🔗 扩展':'🌐 药典全库';}
 function highlightRelated(node){
   for(const x of nodes)x.highlight=false;
   for(const x of nodes){if(x===node)continue;if(x.type===node.type&&x.label===node.label)x.highlight=true;}
@@ -821,29 +878,12 @@ function infer(features){
   return{temp:tempFinal,tastes,meridians,effects,compounds,warns:acc.warns,chains:acc.chains,conflicts};
 }
 const TASTE_CHARS=['酸','苦','甘','辛','咸','涩','淡'];
-function findSimilarHerbs(result,features){
-  return HERBS.map(h=>{
-    let score=0,total=0;
-    total+=3;const hTasteHit=TASTE_CHARS.filter(t=>h.nature.includes(t)&&result.tastes.includes(t)).length;score+=Math.min(hTasteHit,2)*1.5;
-    total+=2;
-    if(result.temp!=='平'){if(h.nature.includes(result.temp))score+=2;else if((result.temp==='寒'||result.temp==='凉')&&(h.nature.includes('寒')||h.nature.includes('凉')))score+=1.5;else if((result.temp==='温'||result.temp==='热')&&(h.nature.includes('温')||h.nature.includes('热')))score+=1.5;}
-    else{if(h.nature.includes('平'))score+=1.5;}
-    total+=3;const merHit=result.meridians.filter(m=>h.meridians.includes(m)).length;score+=Math.min(merHit,3)*1;
-    total+=4;let effHit=0;
-    for(const e of result.effects){const key=e.slice(0,2);if(h.effects.some(he=>he.includes(key)||e.includes(he.slice(0,2))))effHit++;}
-    score+=Math.min(effHit,3)*1.3;
-    total+=2;const famSel=features.family||[];if(famSel.length&&famSel.includes(h.family))score+=2;
-    total+=1;const partSel=features.part||[];if(partSel.length&&partSel.some(p=>h.part.includes(p)))score+=1;
-    return{herb:h,score:score/total};
-  }).sort((a,b)=>b.score-a.score).slice(0,5);
-}
 function computeHerbSimilarity(base,other){
   let score=0,total=0;
   total+=3;
   const baseTastes=TASTE_CHARS.filter(t=>base.nature.includes(t));
   const otherTastes=TASTE_CHARS.filter(t=>other.nature.includes(t));
-  const tasteHit=baseTastes.filter(t=>otherTastes.includes(t)).length;
-  score+=Math.min(tasteHit,2)*1.5;
+  score+=Math.min(baseTastes.filter(t=>otherTastes.includes(t)).length,2)*1.5;
   total+=2;
   const getTemp=n=>{if(n.includes('大寒'))return -2;if(n.includes('寒'))return -2;if(n.includes('凉'))return -1;if(n.includes('大热'))return 2;if(n.includes('热'))return 2;if(n.includes('温'))return 1;return 0;};
   const td=Math.abs(getTemp(base.nature)-getTemp(other.nature));
@@ -860,6 +900,22 @@ function computeHerbSimilarity(base,other){
   if(base.part===other.part)score+=1;
   else if(base.part&&other.part&&(base.part.includes(other.part)||other.part.includes(base.part)))score+=0.6;
   return score/total;
+}
+function findSimilarHerbs(result,features){
+  return HERBS.map(h=>{
+    let score=0,total=0;
+    total+=3;const hTasteHit=TASTE_CHARS.filter(t=>h.nature.includes(t)&&result.tastes.includes(t)).length;score+=Math.min(hTasteHit,2)*1.5;
+    total+=2;
+    if(result.temp!=='平'){if(h.nature.includes(result.temp))score+=2;else if((result.temp==='寒'||result.temp==='凉')&&(h.nature.includes('寒')||h.nature.includes('凉')))score+=1.5;else if((result.temp==='温'||result.temp==='热')&&(h.nature.includes('温')||h.nature.includes('热')))score+=1.5;}
+    else{if(h.nature.includes('平'))score+=1.5;}
+    total+=3;const merHit=result.meridians.filter(m=>h.meridians.includes(m)).length;score+=Math.min(merHit,3)*1;
+    total+=4;let effHit=0;
+    for(const e of result.effects){const key=e.slice(0,2);if(h.effects.some(he=>he.includes(key)||e.includes(he.slice(0,2))))effHit++;}
+    score+=Math.min(effHit,3)*1.3;
+    total+=2;const famSel=features.family||[];if(famSel.length&&famSel.includes(h.family))score+=2;
+    total+=1;const partSel=features.part||[];if(partSel.length&&partSel.some(p=>h.part.includes(p)))score+=1;
+    return{herb:h,score:score/total};
+  }).sort((a,b)=>b.score-a.score).slice(0,5);
 }
 const infForm=document.getElementById('infForm'),infResult=document.getElementById('infResult');
 const INF_SEL={};
@@ -960,17 +1016,13 @@ function compressImage(file,maxSize,quality){
       img.onload=()=>{
         let w=img.width,h=img.height;
         const max=maxSize||1280;
-        if(w>max||h>max){
-          if(w>h){h=Math.round(h*max/w);w=max;}
-          else{w=Math.round(w*max/h);h=max;}
-        }
+        if(w>max||h>max){if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}}
         const canvas=document.createElement('canvas');
         canvas.width=w;canvas.height=h;
         const c2d=canvas.getContext('2d');
         c2d.fillStyle='#ffffff';c2d.fillRect(0,0,w,h);
         c2d.drawImage(img,0,0,w,h);
-        const dataUrl=canvas.toDataURL('image/jpeg',quality||0.85);
-        resolve({dataUrl:dataUrl,width:w,height:h,originalName:file.name,originalSize:file.size});
+        resolve({dataUrl:canvas.toDataURL('image/jpeg',quality||0.85),width:w,height:h,originalName:file.name,originalSize:file.size});
       };
       img.onerror=()=>reject(new Error('图片解析失败'));
       img.src=e.target.result;
@@ -988,22 +1040,17 @@ async function handleImageFile(file){
     imageState.width=res.width;imageState.height=res.height;
     updateImagePreview();
     toast('已添加图片：'+res.originalName);
-  }catch(err){
-    toast('图片处理失败：'+(err.message||err));
-    resetImageUI();
-  }
+  }catch(err){toast('图片处理失败：'+(err.message||err));resetImageUI();}
 }
 function updateImagePreview(){
   if(!iuDrop||!iuPreview)return;
   if(imageState.dataUrl){
-    iuDrop.style.display='none';
-    iuPreview.style.display='flex';
+    iuDrop.style.display='none';iuPreview.style.display='flex';
     if(iuImg)iuImg.src=imageState.dataUrl;
     if(iuName)iuName.textContent=imageState.name||'植物照片';
     if(iuSize)iuSize.textContent=formatBytes(imageState.size)+' · '+imageState.width+'×'+imageState.height;
   }else{
-    iuDrop.style.display='block';
-    iuPreview.style.display='none';
+    iuDrop.style.display='block';iuPreview.style.display='none';
     iuDrop.innerHTML='<span class="iu-icon">🖼</span><span class="iu-text">点击、拖拽或粘贴图片</span><span class="iu-hint">AI 将结合图像特征参与药性推断 · 支持 JPG/PNG，建议 &lt;5MB</span>';
   }
 }
@@ -1016,11 +1063,7 @@ if(iuDrop){
   iuDrop.onclick=()=>{if(imgFileInput)imgFileInput.click();};
   iuDrop.addEventListener('dragover',e=>{e.preventDefault();iuDrop.classList.add('drag');});
   iuDrop.addEventListener('dragleave',()=>iuDrop.classList.remove('drag'));
-  iuDrop.addEventListener('drop',e=>{
-    e.preventDefault();iuDrop.classList.remove('drag');
-    const f=e.dataTransfer.files&&e.dataTransfer.files[0];
-    if(f)handleImageFile(f);
-  });
+  iuDrop.addEventListener('drop',e=>{e.preventDefault();iuDrop.classList.remove('drag');const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)handleImageFile(f);});
 }
 if(imgFileInput)imgFileInput.onchange=()=>{const f=imgFileInput.files&&imgFileInput.files[0];if(f)handleImageFile(f);};
 if(iuRemove)iuRemove.onclick=()=>{resetImageUI();toast('已移除图片');};
@@ -1029,10 +1072,7 @@ window.addEventListener('paste',e=>{
   const items=e.clipboardData&&e.clipboardData.items;
   if(!items)return;
   for(let i=0;i<items.length;i++){
-    if(items[i].type.indexOf('image')>=0){
-      const file=items[i].getAsFile();
-      if(file){e.preventDefault();handleImageFile(file);return;}
-    }
+    if(items[i].type.indexOf('image')>=0){const file=items[i].getAsFile();if(file){e.preventDefault();handleImageFile(file);return;}}
   }
 });
 
@@ -1046,26 +1086,17 @@ if(apiKeyInput)apiKeyInput.addEventListener('change',()=>localStorage.setItem(ke
 if(proxyInput)proxyInput.addEventListener('change',()=>localStorage.setItem(proxyName(),proxyInput.value.trim()));
 loadKey();
 document.querySelectorAll('.ms').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('.ms').forEach(x=>x.classList.remove('active'));
-    btn.classList.add('active');
-    currentModel=btn.dataset.model;
-    loadKey();
-  };
+  btn.onclick=()=>{document.querySelectorAll('.ms').forEach(x=>x.classList.remove('active'));btn.classList.add('active');currentModel=btn.dataset.model;loadKey();};
 });
 document.querySelectorAll('.cm').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('.cm').forEach(x=>x.classList.remove('active'));
-    btn.classList.add('active');
-    compareMode=btn.dataset.cmode;
-    toast('对比范围：'+getCompareModeLabel());
-  };
+  btn.onclick=()=>{document.querySelectorAll('.cm').forEach(x=>x.classList.remove('active'));btn.classList.add('active');compareMode=btn.dataset.cmode;toast('对比范围：'+getCompareModeLabel());};
 });
 
 const SYS_INFER='你是一位精通《中国药典》、中药学、天然药物化学与植物分类学的资深专家。你的专长是依据中医"取象比类"思维与现代植物化学规律（科属与次生代谢产物的相关性），对仅有形态特征或照片的未知植物进行药性推断。回答要求：严格区分【有明确规律支撑】与【纯属推测】的内容；逻辑链条要具体；语言专业简洁；必须明确声明不构成用药建议。';
-const SYS_VISION='你是一位精通《中国药典》、中药学、天然药物化学、植物分类学与药用植物形态学的资深专家。你的专长是根据植物照片结合文字特征，运用中医"取象比类"思维与现代植物化学规律，对未知植物进行药性推断。回答要求：先客观描述你在图片中观察到的形态特征（叶形叶序、花色花型、果实、根茎、整体习性等），再基于这些观察进行药性推断；严格区分【有明确规律支撑】与【纯属推测】的内容；必须明确声明不构成用药建议。';
+const SYS_VISION='你是一位精通《中国药典》、中药学、天然药物化学、植物分类学与药用植物形态学的资深专家。你的专长是根据植物照片结合文字特征，运用中医"取象比类"思维与现代植物化学规律，对未知植物进行药性推断。回答要求：先客观描述你在图片中观察到的形态特征，再基于这些观察进行药性推断；严格区分【有明确规律支撑】与【纯属推测】的内容；必须明确声明不构成用药建议。';
 const SYS_PARSE='你是一位精通《中国药典》2020/2025年版、中药学与天然药物化学的资深专家。你的任务是把用户粘贴的药典正文解析为结构化JSON数据。你必须严格按指定的JSON格式输出，不得输出任何其他解释文字。';
 const SYS_COMPARE='你是一位精通《中国药典》2020年版、中药学、天然药物化学与现代药理学的资深专家。你的任务是对中药进行相似度分析，输出结构化的JSON对比结果。你必须严格按指定的JSON格式输出，不得输出任何其他解释文字、不得使用markdown代码块标记。';
+const SYS_MATH='你是一位精通《中国药典》、中药学、方剂学、天然药物化学与现代药理学的资深专家。你的专长是用"加减法"思维分析中药：①加法——用2-3味已知中药组合，协同覆盖目标药的全部药性维度，替代目标药；②减法——目标药的某些功效被另一味药削弱或抵消后，剩余功效等效于哪味已知中药。回答要求：严格基于药典与通行中药学知识；组合中的药物必须是真实存在的常用中药；必须严格输出指定JSON格式，不得输出任何其他解释文字、不得使用markdown代码块标记。';
 
 function buildInferPrompt(features,hasImage){
   const LABELS={part:'药用部位',color:'主色（五色）',taste:'味道',odor:'气味',texture:'质地',family:'科属',env:'生长环境'};
@@ -1079,78 +1110,70 @@ function buildParsePrompt(text){
   return'请把下面的药典正文解析为结构化 JSON。文本可能包含一味或多味中药，可能来自网页复制、格式不规范。\n\n【解析要求】\n1. 若文本含多味药（以药名标题分隔），请分别解析，输出到 herbs 数组。\n2. 字段说明：\n   - name：药物中文名\n   - short：单个汉字（取药名首字）\n   - family：科属\n   - part：药用部位（去掉"干燥"前缀）\n   - nature：性味（去掉"归…经"部分）\n   - meridians：归经数组（去掉"经"字）\n   - effects：功效数组\n   - indications：主治症状数组\n   - compounds：主要化学成分数组（优先从〖含量测定〗提取，缺失时可补全并加"(推测)"）\n   - pharma：现代药理作用数组（缺失时可推断补全并加"(推测)"）\n   - dosage：用法用量\n   - warnings：安全警示数组\n   - source：数据来源说明\n3. 不要编造药典中不存在的性味、归经、功效。\n\n【输出格式】\n必须且只能输出如下 JSON，不要任何解释：\n{"herbs":[{"name":"","short":"","family":"","part":"","nature":"","meridians":[],"effects":[],"indications":[],"compounds":[],"pharma":[],"dosage":"","warnings":[],"source":""}]}\n\n【药典正文】\n'+text;
 }
 
-/* ====== 相似度对比提示词（三种模式） ====== */
 function fmtHerb(h){
-  return'  - 名称：'+h.name+'\n'+
-    '    科属：'+h.family+'\n'+
-    '    部位：'+h.part+'\n'+
-    '    性味：'+h.nature+'\n'+
-    '    归经：'+(h.meridians||[]).join('、')+'\n'+
-    '    功效：'+(h.effects||[]).join('、')+'\n'+
-    '    成分：'+(h.compounds||[]).join('、')+'\n'+
-    '    药理：'+(h.pharma||[]).join('、');
+  return'  - 名称：'+h.name+'\n    科属：'+h.family+'\n    部位：'+h.part+'\n    性味：'+h.nature+'\n    归经：'+(h.meridians||[]).join('、')+'\n    功效：'+(h.effects||[]).join('、')+'\n    成分：'+(h.compounds||[]).join('、')+'\n    药理：'+(h.pharma||[]).join('、');
 }
-function buildComparePrompt(baseHerb,candidates,mode){
-  const OUTPUT_FORMAT='{\n'+
-    '  "comparisons": [\n'+
-    '    {\n'+
-    '      "name": "药名",\n'+
-    '      "overall": 78,\n'+
-    '      "nature": 85,\n'+
-    '      "meridians": 90,\n'+
-    '      "effects": 70,\n'+
-    '      "compounds": 60,\n'+
-    '      "similarities": "相似点（40字内）",\n'+
-    '      "differences": "差异点（60字内）",\n'+
-    '      "summary": "一句话总结（30字内）",\n'+
-    '      "family": "科属",\n'+
-    '      "part": "药用部位",\n'+
-    '      "natureText": "性味",\n'+
-    '      "meridiansList": ["归经1","归经2"],\n'+
-    '      "effectsList": ["功效1","功效2"],\n'+
-    '      "compoundsList": ["成分1","成分2"],\n'+
-    '      "pharmaList": ["药理1","药理2"]\n'+
-    '    }\n'+
-    '  ]\n'+
-    '}';
-  const REQUIRE='\n【要求】\n'+
-    '- overall 为整体相似度百分比（0-100 整数）\n'+
-    '- nature/meridians/effects/compounds 分别为性味、归经、功效、成分的相似度百分比（0-100 整数）\n'+
-    '- similarities：相似之处（40字内）\n'+
-    '- differences：差异之处（60字内）\n'+
-    '- summary：一句话总结（30字内）\n'+
-    '- 所有药物都必须提供完整字段 family/part/natureText/meridiansList/effectsList/compoundsList/pharmaList（即使已在用户图谱中，也要按药典内容填写）\n'+
-    '- 按 overall 从高到低排序\n'+
-    '- 只输出 JSON，不要 markdown 代码块标记，不要任何解释文字';
+const COMPARE_OUTPUT='{\n  "comparisons": [\n    {\n      "name": "药名",\n      "overall": 78,\n      "nature": 85,\n      "meridians": 90,\n      "effects": 70,\n      "compounds": 60,\n      "similarities": "相似点（40字内）",\n      "differences": "差异点（60字内）",\n      "summary": "一句话总结（30字内）",\n      "family": "科属",\n      "part": "药用部位",\n      "natureText": "性味",\n      "meridiansList": ["归经1","归经2"],\n      "effectsList": ["功效1","功效2"],\n      "compoundsList": ["成分1","成分2"],\n      "pharmaList": ["药理1","药理2"]\n    }\n  ]\n}';
+const COMPARE_REQUIRE='\n【要求】\n- overall/nature/meridians/effects/compounds 均为 0-100 整数\n- 所有药物都必须提供完整字段 family/part/natureText/meridiansList/effectsList/compoundsList/pharmaList\n- 按 overall 从高到低排序\n- 只输出 JSON，不要 markdown 代码块标记，不要任何解释文字';
 
+function buildComparePrompt(baseHerb,candidates,mode){
   if(mode==='local'){
     let candidateStr='';
     candidates.forEach((c,i)=>{candidateStr+='\n['+(i+1)+'] '+c.name+'\n'+fmtHerb(c);});
-    return'请对中药「'+baseHerb.name+'」与以下 '+candidates.length+' 味候选中药进行相似度分析。\n\n'+
-      '【基础药物】\n'+fmtHerb(baseHerb)+'\n\n'+
-      '【候选药物】'+candidateStr+'\n\n'+
-      '请对每个候选药物与基础药物的相似度进行评估，严格输出以下 JSON 格式：\n'+OUTPUT_FORMAT+REQUIRE;
+    return'请对中药「'+baseHerb.name+'」与以下 '+candidates.length+' 味候选中药进行相似度分析。\n\n【基础药物】\n'+fmtHerb(baseHerb)+'\n\n【候选药物】'+candidateStr+'\n\n请对每个候选药物与基础药物的相似度进行评估，严格输出以下 JSON 格式：\n'+COMPARE_OUTPUT+COMPARE_REQUIRE;
   }
   if(mode==='extended'){
     let candidateStr='';
     candidates.forEach((c,i)=>{candidateStr+='\n['+(i+1)+'] '+c.name+'\n'+fmtHerb(c);});
-    return'请对中药「'+baseHerb.name+'」进行相似药物分析。\n\n'+
-      '【基础药物】\n'+fmtHerb(baseHerb)+'\n\n'+
-      '【已筛选的候选药物（用户图谱中的相似药物）】'+candidateStr+'\n\n'+
-      '任务：\n'+
-      '1. 对以上 '+candidates.length+' 味候选药物逐一评分（按下面输出格式输出）\n'+
-      '2. 再从《中国药典》2020年版一部收录的其他中药中，推荐最多 3 味与「'+baseHerb.name+'」相似但未在候选列表中的药物，一并评分输出\n'+
-      '3. 所有药物（包括候选和新增）都放在同一个 comparisons 数组中，按 overall 从高到低排序\n'+
-      '4. 新增的药物名不能与候选列表中的重复，也不能是「'+baseHerb.name+'」自身\n\n'+
-      '请严格输出以下 JSON 格式：\n'+OUTPUT_FORMAT+REQUIRE;
+    return'请对中药「'+baseHerb.name+'」进行相似药物分析。\n\n【基础药物】\n'+fmtHerb(baseHerb)+'\n\n【已筛选的候选药物（用户图谱中的相似药物）】'+candidateStr+'\n\n任务：\n1. 对以上 '+candidates.length+' 味候选药物逐一评分\n2. 再从《中国药典》2020年版一部收录的其他中药中，推荐最多 3 味与「'+baseHerb.name+'」相似但未在候选列表中的药物，一并评分输出\n3. 所有药物（包括候选和新增）都放在同一个 comparisons 数组中，按 overall 从高到低排序\n4. 新增的药物名不能与候选列表中的重复，也不能是「'+baseHerb.name+'」自身\n\n请严格输出以下 JSON 格式：\n'+COMPARE_OUTPUT+COMPARE_REQUIRE;
   }
-  // ai 模式：完全由AI推荐
-  return'请对中药「'+baseHerb.name+'」进行相似药物分析。\n\n'+
-    '【基础药物】\n'+fmtHerb(baseHerb)+'\n\n'+
-    '任务：\n'+
-    '从《中国药典》2020年版一部收录的中药中，推荐 6-8 味与「'+baseHerb.name+'」在性味、归经、功效、成分等维度上相似的中药，逐一评分。\n'+
-    '不能推荐「'+baseHerb.name+'」自身。优先选择不同科属、不同药用部位的药物，以提供更广泛的参考。\n\n'+
-    '请严格输出以下 JSON 格式：\n'+OUTPUT_FORMAT+REQUIRE;
+  return'请对中药「'+baseHerb.name+'」进行相似药物分析。\n\n【基础药物】\n'+fmtHerb(baseHerb)+'\n\n任务：\n从《中国药典》2020年版一部收录的中药中，推荐 6-8 味与「'+baseHerb.name+'」在性味、归经、功效、成分等维度上相似的中药，逐一评分。\n不能推荐「'+baseHerb.name+'」自身。优先选择不同科属、不同药用部位的药物，以提供更广泛的参考。\n\n请严格输出以下 JSON 格式：\n'+COMPARE_OUTPUT+COMPARE_REQUIRE;
+}
+
+/* ====== 加减法提示词 ====== */
+const MATH_OUTPUT='{\n'+
+  '  "addition": [\n'+
+  '    {\n'+
+  '      "combination": ["药A","药B"],\n'+
+  '      "coverage": 85,\n'+
+  '      "reason": "药A补气升阳，药B活血通经，两者协同可覆盖目标药的补气与活血功效",\n'+
+  '      "detail": "目标药的补气升阳主要由药A承担（占比约60%），活血通经主要由药B承担（占比约40%）；两药合用后性味偏甘温辛，与目标药基本吻合；缺失的主要是XX功效，可通过调整剂量弥补",\n'+
+  '      "herbsData": [\n'+
+  '        {"name":"药A","short":"A","family":"","part":"","nature":"","meridians":[],"effects":[],"compounds":[],"pharma":[]},\n'+
+  '        {"name":"药B","short":"B","family":"","part":"","nature":"","meridians":[],"effects":[],"compounds":[],"pharma":[]}\n'+
+  '      ]\n'+
+  '    }\n'+
+  '  ],\n'+
+  '  "subtraction": [\n'+
+  '    {\n'+
+  '      "minus": "药Y",\n'+
+  '      "result": "药Z",\n'+
+  '      "match": 78,\n'+
+  '      "reason": "目标药减去药Y的清热功效后，剩余的补气、升阳功效与药Z高度重叠",\n'+
+  '      "detail": "药Y主要提供清热燥湿功效；减去后目标药剩余的补气升阳、固表止汗功效与药Z基本一致；但失去了清热之力，整体偏温补",\n'+
+  '      "herbsData": [\n'+
+  '        {"name":"药Y","short":"Y","family":"","part":"","nature":"","meridians":[],"effects":[],"compounds":[],"pharma":[]},\n'+
+  '        {"name":"药Z","short":"Z","family":"","part":"","nature":"","meridians":[],"effects":[],"compounds":[],"pharma":[]}\n'+
+  '      ]\n'+
+  '    }\n'+
+  '  ]\n'+
+  '}';
+const MATH_REQUIRE='\n【要求】\n'+
+  '- addition 数组：给出 2-3 组替代方案，每组由 2-3 味药组成（combination 长度 2-3）\n'+
+  '- subtraction 数组：给出 2-3 组相减方案（每组的 minus 一味药，result 为等效药物）\n'+
+  '- coverage/match 均为 0-100 整数，代表替代/等效的吻合度\n'+
+  '- reason：简明理由，30-50字\n'+
+  '- detail：详细说明哪些功效由哪味药承担、哪些药性被覆盖或缺失、整体性味是否吻合，80-120字\n'+
+  '- herbsData：每味药的完整数据（name/short/family/part/nature/meridians/effects/compounds/pharma），必须准确反映《中国药典》记载\n'+
+  '- combination 和 result 中的药物不能是目标药自身\n'+
+  '- 组合药物不能都是目标药的简单重复，要能体现协同或互补\n'+
+  '- 只输出 JSON，不要 markdown 代码块标记，不要任何解释文字';
+
+function buildMathPrompt(baseHerb){
+  return'请对中药「'+baseHerb.name+'」进行加减法分析。\n\n【目标药物】\n'+fmtHerb(baseHerb)+'\n\n任务：\n'+
+    '【加法分析】找出 2-3 组由 2-3 味常用中药组成的替代方案，使得组合后的药性（性味、归经、功效）能大致覆盖「'+baseHerb.name+'」的全部药性维度。每组的药物必须真实存在、可以合法配伍，组合不能包含目标药自身。\n\n'+
+    '【减法分析】找出 2-3 组相减方案：目标药「'+baseHerb.name+'」的某类功效被另一味药 Y 削弱或抵消后，剩余功效等效于哪味已知中药 Z。Y 与 Z 都不能是目标药自身。\n\n'+
+    '请严格输出以下 JSON 格式：\n'+MATH_OUTPUT+MATH_REQUIRE;
 }
 
 async function callGLM(apiKey,prompt,proxy,sys,maxTokens){
@@ -1169,18 +1192,8 @@ async function callDeepSeek(apiKey,prompt,proxy,sys,maxTokens){
 }
 async function callGLMVision(apiKey,prompt,imageDataUrl,proxy){
   const base=proxy?proxy.replace(/\/$/,'')+'/chat/completions':'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-  const messages=[
-    {role:'system',content:SYS_VISION},
-    {role:'user',content:[
-      {type:'image_url',image_url:{url:imageDataUrl}},
-      {type:'text',text:prompt}
-    ]}
-  ];
-  const res=await fetch(base,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-    body:JSON.stringify({model:'glm-4v-flash',messages:messages,temperature:0.35,max_tokens:3200,stream:false})
-  });
+  const messages=[{role:'system',content:SYS_VISION},{role:'user',content:[{type:'image_url',image_url:{url:imageDataUrl}},{type:'text',text:prompt}]}];
+  const res=await fetch(base,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify({model:'glm-4v-flash',messages:messages,temperature:0.35,max_tokens:3200,stream:false})});
   if(!res.ok){const t=await res.text().catch(()=>'');throw new Error('智谱清言视觉模型返回 '+res.status+'\n'+t.slice(0,300));}
   const data=await res.json();
   return(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'（模型返回为空）';
@@ -1197,41 +1210,16 @@ function modelLabel(){return currentModel==='glm'?'智谱清言':'DeepSeek';}
 async function runComparison(baseHerb){
   if(!baseHerb){toast('请先选中一味药物');return;}
   const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
-  if(!apiKey){
-    aiOut.innerHTML='<div class="err">请先在上方填入 API Key。<br><br>· 智谱清言：open.bigmodel.cn 控制台获取<br>· DeepSeek：platform.deepseek.com 控制台获取</div>';
-    return;
-  }
-
-  // 本地候选（仅 local / extended 模式使用）
+  if(!apiKey){aiOut.innerHTML='<div class="err">请先在上方填入 API Key。</div>';return;}
   let candidates=[];
   if(compareMode==='local'||compareMode==='extended'){
-    candidates=HERBS
-      .filter(h=>h.id!==baseHerb.id)
-      .map(h=>({herb:h,score:computeHerbSimilarity(baseHerb,h)}))
-      .sort((a,b)=>b.score-a.score)
-      .slice(0,5)
-      .map(c=>c.herb);
+    candidates=HERBS.filter(h=>h.id!==baseHerb.id).map(h=>({herb:h,score:computeHerbSimilarity(baseHerb,h)})).sort((a,b)=>b.score-a.score).slice(0,5).map(c=>c.herb);
   }
-
   if(compareMode==='local'&&!candidates.length){toast('数据库中没有其他药物可供对比');return;}
-
-  // 显示基础药物卡片
   const name=modelLabel();
-  let baseHTML='<div class="cmp-base">';
-  baseHTML+='<div class="cmp-base-head"><div class="cmp-base-icon">'+baseHerb.short+'</div>';
-  baseHTML+='<div><div class="cmp-base-name">'+baseHerb.name+'</div>';
-  baseHTML+='<div class="cmp-base-sub">'+baseHerb.family+' · '+baseHerb.part+'</div></div></div>';
-  baseHTML+='<div class="cmp-base-meta"><b>性味</b>'+baseHerb.nature+' · <b>归经</b>'+(baseHerb.meridians||[]).join('、')+'经</div>';
-  baseHTML+='<div class="cmp-base-meta"><b>功效</b>'+(baseHerb.effects||[]).join('、')+'</div>';
-  baseHTML+='</div>';
-
-  const loadMsg=compareMode==='local'
-    ? name+' 正在分析应用内相似度（候选 '+candidates.length+' 味）…'
-    : compareMode==='extended'
-      ? name+' 正在分析（'+candidates.length+' 味候选 + AI 药典扩展推荐）…'
-      : name+' 正在从药典全库检索相似药物…';
+  const baseHTML=renderBaseCard(baseHerb);
+  const loadMsg=compareMode==='local'?name+' 正在分析应用内相似度（候选 '+candidates.length+' 味）…':compareMode==='extended'?name+' 正在分析（'+candidates.length+' 味候选 + AI 药典扩展）…':name+' 正在从药典全库检索相似药物…';
   aiOut.innerHTML=baseHTML+'<div class="loading"><div class="spin"></div>'+loadMsg+'</div>';
-
   try{
     const prompt=buildComparePrompt(baseHerb,candidates,compareMode);
     const maxTokens=compareMode==='ai'?4500:compareMode==='extended'?4500:3600;
@@ -1239,11 +1227,18 @@ async function runComparison(baseHerb){
     const comparisons=parseCompareJson(raw,baseHerb);
     lastComparisonData={baseHerb,comparisons,mode:compareMode};
     renderComparisons(baseHerb,comparisons,name);
-  }catch(err){
-    aiOut.innerHTML=baseHTML+renderAIError(err);
-  }
+  }catch(err){aiOut.innerHTML=baseHTML+renderAIError(err);}
 }
-
+function renderBaseCard(h){
+  let html='<div class="cmp-base">';
+  html+='<div class="cmp-base-head"><div class="cmp-base-icon">'+h.short+'</div>';
+  html+='<div><div class="cmp-base-name">'+h.name+'</div>';
+  html+='<div class="cmp-base-sub">'+h.family+' · '+h.part+'</div></div></div>';
+  html+='<div class="cmp-base-meta"><b>性味</b>'+h.nature+' · <b>归经</b>'+(h.meridians||[]).join('、')+'经</div>';
+  html+='<div class="cmp-base-meta"><b>功效</b>'+(h.effects||[]).join('、')+'</div>';
+  html+='</div>';
+  return html;
+}
 function parseCompareJson(raw,baseHerb){
   let s=String(raw).trim();
   s=s.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
@@ -1252,99 +1247,37 @@ function parseCompareJson(raw,baseHerb){
   s=s.slice(start,end+1);
   let obj;
   try{obj=JSON.parse(s);}
-  catch(e){
-    s=s.replace(/,\s*([}\]])/g,'$1');
-    try{obj=JSON.parse(s);}catch(e2){throw new Error('AI 返回的 JSON 格式有误：'+e2.message);}
-  }
-  if(!obj.comparisons||!Array.isArray(obj.comparisons)||!obj.comparisons.length){
-    throw new Error('AI 返回结构缺少 comparisons 数组');
-  }
-  // 过滤掉基础药物自身
+  catch(e){s=s.replace(/,\s*([}\]])/g,'$1');try{obj=JSON.parse(s);}catch(e2){throw new Error('AI 返回的 JSON 格式有误：'+e2.message);}}
+  if(!obj.comparisons||!Array.isArray(obj.comparisons)||!obj.comparisons.length)throw new Error('AI 返回结构缺少 comparisons 数组');
   const list=obj.comparisons.filter(c=>c.name&&c.name!==baseHerb.name);
   return list.map(c=>{
     const existing=HERBS.find(h=>h.name===c.name);
     if(existing){
-      return{
-        name:existing.name,
-        herbId:existing.id,
-        inDatabase:true,
-        family:existing.family,
-        part:existing.part,
-        rawHerb:existing,
-        overall:Math.max(0,Math.min(100,parseInt(c.overall,10)||0)),
-        nature:Math.max(0,Math.min(100,parseInt(c.nature,10)||0)),
-        meridians:Math.max(0,Math.min(100,parseInt(c.meridians,10)||0)),
-        effects:Math.max(0,Math.min(100,parseInt(c.effects,10)||0)),
-        compounds:Math.max(0,Math.min(100,parseInt(c.compounds,10)||0)),
-        similarities:c.similarities||'',
-        differences:c.differences||'',
-        summary:c.summary||''
-      };
-    } else {
-      const rawHerb={
-        name:c.name,
-        short:c.short||c.name.charAt(0),
-        family:c.family||'未知',
-        part:c.part||'未知',
-        nature:c.natureText||'待确认',
-        meridians:Array.isArray(c.meridiansList)&&c.meridiansList.length?c.meridiansList:['待确认'],
-        effects:Array.isArray(c.effectsList)&&c.effectsList.length?c.effectsList:['待确认'],
-        compounds:Array.isArray(c.compoundsList)&&c.compoundsList.length?c.compoundsList:['待确认'],
-        pharma:Array.isArray(c.pharmaList)&&c.pharmaList.length?c.pharmaList:['待确认'],
-        source:'AI 相似推荐（'+getCompareModeLabel()+'）'
-      };
-      return{
-        name:c.name,
-        herbId:'',
-        inDatabase:false,
-        family:rawHerb.family,
-        part:rawHerb.part,
-        rawHerb,
-        overall:Math.max(0,Math.min(100,parseInt(c.overall,10)||0)),
-        nature:Math.max(0,Math.min(100,parseInt(c.nature,10)||0)),
-        meridians:Math.max(0,Math.min(100,parseInt(c.meridians,10)||0)),
-        effects:Math.max(0,Math.min(100,parseInt(c.effects,10)||0)),
-        compounds:Math.max(0,Math.min(100,parseInt(c.compounds,10)||0)),
-        similarities:c.similarities||'',
-        differences:c.differences||'',
-        summary:c.summary||''
-      };
+      return{name:existing.name,herbId:existing.id,inDatabase:true,family:existing.family,part:existing.part,rawHerb:existing,
+        overall:parseInt(c.overall,10)||0,nature:parseInt(c.nature,10)||0,meridians:parseInt(c.meridians,10)||0,effects:parseInt(c.effects,10)||0,compounds:parseInt(c.compounds,10)||0,
+        similarities:c.similarities||'',differences:c.differences||'',summary:c.summary||''};
     }
+    const rawHerb={name:c.name,short:c.short||c.name.charAt(0),family:c.family||'未知',part:c.part||'未知',nature:c.natureText||'待确认',
+      meridians:Array.isArray(c.meridiansList)&&c.meridiansList.length?c.meridiansList:['待确认'],
+      effects:Array.isArray(c.effectsList)&&c.effectsList.length?c.effectsList:['待确认'],
+      compounds:Array.isArray(c.compoundsList)&&c.compoundsList.length?c.compoundsList:['待确认'],
+      pharma:Array.isArray(c.pharmaList)&&c.pharmaList.length?c.pharmaList:['待确认'],
+      source:'AI 相似推荐（'+getCompareModeLabel()+'）'};
+    return{name:c.name,herbId:'',inDatabase:false,family:rawHerb.family,part:rawHerb.part,rawHerb,
+      overall:parseInt(c.overall,10)||0,nature:parseInt(c.nature,10)||0,meridians:parseInt(c.meridians,10)||0,effects:parseInt(c.effects,10)||0,compounds:parseInt(c.compounds,10)||0,
+      similarities:c.similarities||'',differences:c.differences||'',summary:c.summary||''};
   }).sort((a,b)=>b.overall-a.overall);
 }
-
 function renderComparisons(baseHerb,comparisons,modelName){
-  let html='<div class="cmp-base">';
-  html+='<div class="cmp-base-head"><div class="cmp-base-icon">'+baseHerb.short+'</div>';
-  html+='<div><div class="cmp-base-name">'+baseHerb.name+'</div>';
-  html+='<div class="cmp-base-sub">'+baseHerb.family+' · '+baseHerb.part+'</div></div></div>';
-  html+='<div class="cmp-base-meta"><b>性味</b>'+baseHerb.nature+' · <b>归经</b>'+(baseHerb.meridians||[]).join('、')+'经</div>';
-  html+='<div class="cmp-base-meta"><b>功效</b>'+(baseHerb.effects||[]).join('、')+'</div>';
-  html+='</div>';
-
+  let html=renderBaseCard(baseHerb);
   const newCount=comparisons.filter(c=>!c.inDatabase).length;
-  html+='<div style="font-size:11px;color:#5d6b7d;margin-bottom:10px;letter-spacing:.3px">'+
-    modelName+' · '+getCompareModeLabel()+' · 共 '+comparisons.length+' 味'+
-    (newCount?'（其中 '+newCount+' 味可添加到图谱）':'')+
-    ' · '+new Date().toLocaleTimeString('zh-CN')+'</div>';
-
+  html+='<div style="font-size:11px;color:#5d6b7d;margin-bottom:10px">'+modelName+' · '+getCompareModeLabel()+' · 共 '+comparisons.length+' 味'+(newCount?'（其中 '+newCount+' 味可添加）':'')+' · '+new Date().toLocaleTimeString('zh-CN')+'</div>';
   comparisons.forEach((c,i)=>{
     html+='<div class="cmp-card" data-cmp-idx="'+i+'">';
-    html+='<div class="cmp-head">';
-    html+='<div class="cmp-name-wrap">';
-    html+='<span class="cmp-rank">'+(i+1)+'</span>';
-    if(c.inDatabase){
-      html+='<span class="cmp-name" data-hid="'+c.herbId+'">'+c.name+'</span>';
-      if(c.family)html+='<span class="cmp-meta">'+c.family+' · '+c.part+'</span>';
-    } else {
-      html+='<span class="cmp-name">'+c.name+'</span>';
-      html+='<span class="cmp-new-badge">新</span>';
-      if(c.family&&c.family!=='未知')html+='<span class="cmp-meta">'+c.family+' · '+(c.part||'')+'</span>';
-      html+='<button class="cmp-add-btn" data-add-idx="'+i+'">+ 添加到图谱</button>';
-    }
-    html+='</div>';
-    html+='<div class="cmp-overall">'+c.overall+'<small>%</small></div>';
-    html+='</div>';
+    html+='<div class="cmp-head"><div class="cmp-name-wrap"><span class="cmp-rank">'+(i+1)+'</span>';
+    if(c.inDatabase){html+='<span class="cmp-name" data-hid="'+c.herbId+'">'+c.name+'</span>';if(c.family)html+='<span class="cmp-meta">'+c.family+' · '+c.part+'</span>';}
+    else{html+='<span class="cmp-name">'+c.name+'</span><span class="cmp-new-badge">新</span>';if(c.family&&c.family!=='未知')html+='<span class="cmp-meta">'+c.family+' · '+(c.part||'')+'</span>';html+='<button class="cmp-add-btn" data-add-idx="'+i+'">+ 添加到图谱</button>';}
+    html+='</div><div class="cmp-overall">'+c.overall+'<small>%</small></div></div>';
     html+='<div class="cmp-bar-main"><i style="width:'+c.overall+'%"></i></div>';
     html+='<div class="cmp-dims">';
     html+='<div class="cmp-dim"><span class="cmp-dim-label">性味</span><div class="cmp-dim-bar"><i class="n" style="width:'+c.nature+'%"></i></div><span class="cmp-dim-val">'+c.nature+'%</span></div>';
@@ -1356,74 +1289,263 @@ function renderComparisons(baseHerb,comparisons,modelName){
     if(c.similarities)html+='<p><b class="sim">相似</b>'+escapeHtml(c.similarities)+'</p>';
     if(c.differences)html+='<p><b class="dif">差异</b>'+escapeHtml(c.differences)+'</p>';
     if(c.summary)html+='<p class="cmp-summary">'+escapeHtml(c.summary)+'</p>';
-    html+='</div>';
-    html+='</div>';
+    html+='</div></div>';
   });
-
-  html+='<div class="hint" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:#5d6b7d;line-height:1.6">'+
-    '相似度由 AI 基于性味、归经、功效、成分四维度综合评估，百分比仅供参考。'+
-    '应用内药物点击药名可定位；应用外药物点击「+ 添加到图谱」可加入画布。</div>';
-
+  html+='<div class="hint" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">相似度由 AI 基于性味、归经、功效、成分四维度综合评估。应用内药物点击药名可定位；应用外药物可一键添加到图谱。</div>';
   aiOut.innerHTML=html;
-
-  // 应用内药物点击定位
   aiOut.querySelectorAll('.cmp-name[data-hid]').forEach(el=>{
-    const hid=el.dataset.hid;
-    if(!hid)return;
-    el.onclick=()=>{
-      const n=nodeIndex.get('herb:'+hid);
-      if(n){focusNode(n);selectNode(n);switchTab('detail');}
-    };
+    const hid=el.dataset.hid;if(!hid)return;
+    el.onclick=()=>{const n=nodeIndex.get('herb:'+hid);if(n){focusNode(n);selectNode(n);switchTab('detail');}};
   });
-  // 应用外药物点击"添加到图谱"
-  aiOut.querySelectorAll('.cmp-add-btn').forEach(btn=>{
-    btn.onclick=e=>{
-      e.stopPropagation();
-      const idx=parseInt(btn.dataset.addIdx,10);
-      addComparisonHerb(idx,btn);
-    };
-  });
+  aiOut.querySelectorAll('.cmp-add-btn').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();addComparisonHerb(parseInt(btn.dataset.addIdx,10),btn);};});
 }
-
 function addComparisonHerb(idx,btn){
   if(!lastComparisonData)return;
   const c=lastComparisonData.comparisons[idx];
   if(!c||c.inDatabase)return;
   try{
     const herb=importHerbFromParsed(c.rawHerb);
-    // 标记为已添加
-    c.inDatabase=true;
-    c.herbId=herb.id;
-    // 更新按钮状态
-    if(btn){
-      btn.textContent='✓ 已添加';
-      btn.disabled=true;
-    }
-    // 让卡片药名可点击
+    c.inDatabase=true;c.herbId=herb.id;
+    if(btn){btn.textContent='✓ 已添加';btn.disabled=true;}
     const card=btn.closest('.cmp-card');
     if(card){
       const nameEl=card.querySelector('.cmp-name');
-      if(nameEl){
-        nameEl.style.cursor='pointer';
-        nameEl.dataset.hid=herb.id;
-        nameEl.onclick=()=>{
-          const n=nodeIndex.get('herb:'+herb.id);
-          if(n){focusNode(n);selectNode(n);switchTab('detail');}
-        };
-      }
+      if(nameEl){nameEl.style.cursor='pointer';nameEl.dataset.hid=herb.id;nameEl.onclick=()=>{const n=nodeIndex.get('herb:'+herb.id);if(n){focusNode(n);selectNode(n);switchTab('detail');}};}
       const badge=card.querySelector('.cmp-new-badge');
       if(badge)badge.style.display='none';
     }
     buildLegend();
     toast('已添加「'+herb.name+'」到图谱');
-    setTimeout(()=>{
-      const n=nodeIndex.get('herb:'+herb.id);
-      if(n){focusNode(n);selectNode(n);cam.zoom=Math.min(cam.zoom,1.0);}
-    },150);
-  }catch(err){
-    console.error('添加失败:',err);
-    toast('添加失败：'+(err.message||err));
+    setTimeout(()=>{const n=nodeIndex.get('herb:'+herb.id);if(n){focusNode(n);selectNode(n);cam.zoom=Math.min(cam.zoom,1.0);}},150);
+  }catch(err){console.error('添加失败:',err);toast('添加失败：'+(err.message||err));}
+}
+
+/* ====== 加减法主逻辑 ====== */
+async function runMathAnalysis(baseHerb){
+  if(!baseHerb){toast('请先选中一味药物');return;}
+  const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
+  if(!apiKey){aiOut.innerHTML='<div class="err">请先在上方填入 API Key。</div>';return;}
+  const name=modelLabel();
+  const baseHTML=renderBaseCard(baseHerb);
+  aiOut.innerHTML=baseHTML+'<div class="loading"><div class="spin"></div>'+name+' 正在计算加减法组合…</div>';
+  try{
+    const prompt=buildMathPrompt(baseHerb);
+    const raw=await callAI(prompt,SYS_MATH,4500);
+    const data=parseMathJson(raw,baseHerb);
+    lastMathData={baseHerb,data};
+    renderMathAnalysis(baseHerb,data,name);
+  }catch(err){aiOut.innerHTML=baseHTML+renderAIError(err);}
+}
+function parseMathJson(raw,baseHerb){
+  let s=String(raw).trim();
+  s=s.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+  const start=s.indexOf('{'),end=s.lastIndexOf('}');
+  if(start<0||end<0)throw new Error('AI 未返回 JSON 结构');
+  s=s.slice(start,end+1);
+  let obj;
+  try{obj=JSON.parse(s);}
+  catch(e){s=s.replace(/,\s*([}\]])/g,'$1');try{obj=JSON.parse(s);}catch(e2){throw new Error('AI 返回的 JSON 格式有误：'+e2.message);}}
+  const addition=Array.isArray(obj.addition)?obj.addition:[];
+  const subtraction=Array.isArray(obj.subtraction)?obj.subtraction:[];
+  if(!addition.length&&!subtraction.length)throw new Error('AI 未返回有效的加减法组合');
+  // 处理每味药的数据
+  const normalize=hd=>{
+    if(!hd||!hd.name)return null;
+    const existing=HERBS.find(h=>h.name===hd.name);
+    if(existing)return{...existing,inDatabase:true,herbId:existing.id,rawHerb:existing};
+    const rawHerb={
+      name:hd.name,short:hd.short||hd.name.charAt(0),family:hd.family||'未知',part:hd.part||'未知',
+      nature:hd.nature||'待确认',
+      meridians:Array.isArray(hd.meridians)&&hd.meridians.length?hd.meridians:['待确认'],
+      effects:Array.isArray(hd.effects)&&hd.effects.length?hd.effects:['待确认'],
+      compounds:Array.isArray(hd.compounds)&&hd.compounds.length?hd.compounds:['待确认'],
+      pharma:Array.isArray(hd.pharma)&&hd.pharma.length?hd.pharma:['待确认'],
+      source:'AI 加减法推荐'
+    };
+    return{...rawHerb,inDatabase:false,herbId:'',rawHerb};
+  };
+  const additionClean=addition.map(a=>{
+    if(!Array.isArray(a.combination)||!a.combination.length)return null;
+    const herbs=(Array.isArray(a.herbsData)?a.herbsData:[]).map(normalize).filter(Boolean);
+    // 若 herbsData 缺失或与 combination 不一致，用 combination 中名字补充空数据
+    const finalHerbs=a.combination.map((name,i)=>{
+      if(herbs[i]&&herbs[i].name===name)return herbs[i];
+      const found=herbs.find(h=>h.name===name);
+      if(found)return found;
+      return normalize({name:name})||{name:name,short:name.charAt(0),family:'未知',part:'未知',nature:'待确认',meridians:['待确认'],effects:['待确认'],compounds:['待确认'],pharma:['待确认'],source:'AI 加减法推荐',inDatabase:false,herbId:'',rawHerb:{name:name,short:name.charAt(0),family:'未知',part:'未知',nature:'待确认',meridians:['待确认'],effects:['待确认'],compounds:['待确认'],pharma:['待确认'],source:'AI 加减法推荐'}};
+    });
+    return{
+      combination:a.combination,
+      coverage:parseInt(a.coverage,10)||0,
+      reason:a.reason||'',
+      detail:a.detail||'',
+      herbs:finalHerbs
+    };
+  }).filter(Boolean);
+  const subtractionClean=subtraction.map(s2=>{
+    if(!s2.minus||!s2.result)return null;
+    const herbs=(Array.isArray(s2.herbsData)?s2.herbsData:[]).map(normalize).filter(Boolean);
+    const minusHerb=herbs.find(h=>h.name===s2.minus)||normalize({name:s2.minus})||{name:s2.minus,short:s2.minus.charAt(0),family:'未知',part:'未知',nature:'待确认',meridians:['待确认'],effects:['待确认'],compounds:['待确认'],pharma:['待确认'],source:'AI 加减法推荐',inDatabase:false,herbId:'',rawHerb:{name:s2.minus,short:s2.minus.charAt(0),family:'未知',part:'未知',nature:'待确认',meridians:['待确认'],effects:['待确认'],compounds:['待确认'],pharma:['待确认'],source:'AI 加减法推荐'}};
+    const resultHerb=herbs.find(h=>h.name===s2.result)||normalize({name:s2.result})||{name:s2.result,short:s2.result.charAt(0),family:'未知',part:'未知',nature:'待确认',meridians:['待确认'],effects:['待确认'],compounds:['待确认'],pharma:['待确认'],source:'AI 加减法推荐',inDatabase:false,herbId:'',rawHerb:{name:s2.result,short:s2.result.charAt(0),family:'未知',part:'未知',nature:'待确认',meridians:['待确认'],effects:['待确认'],compounds:['待确认'],pharma:['待确认'],source:'AI 加减法推荐'}};
+    return{minus:s2.minus,result:s2.result,match:parseInt(s2.match,10)||0,reason:s2.reason||'',detail:s2.detail||'',minusHerb,resultHerb};
+  }).filter(Boolean);
+  return{addition:additionClean,subtraction:subtractionClean};
+}
+function renderMathAnalysis(baseHerb,data,modelName){
+  let html=renderBaseCard(baseHerb);
+  html+='<div style="font-size:11px;color:#5d6b7d;margin-bottom:14px">'+modelName+' · ⚖️ 加减法分析 · '+new Date().toLocaleTimeString('zh-CN')+'</div>';
+
+  // 加法
+  if(data.addition.length){
+    html+='<div class="math-section">';
+    html+='<div class="math-title add">加法组合 · 替代方案</div>';
+    data.addition.forEach((a,i)=>{
+      html+='<div class="math-card add" data-math-type="add" data-math-idx="'+i+'">';
+      // 等式
+      html+='<div class="math-eq">';
+      a.combination.forEach((n,j)=>{
+        const hd=a.herbs[j]||{};
+        html+='<span class="math-pill '+(hd.inDatabase?'':'missing')+'" data-math-herb="'+escapeAttr(n)+'" data-math-role="add">'+n+'</span>';
+        if(j<a.combination.length-1)html+='<span class="math-op p">+</span>';
+      });
+      html+='<span class="math-op e">≈</span>';
+      html+='<span class="math-pill result">'+baseHerb.name+'</span>';
+      html+='</div>';
+      // 覆盖度
+      html+='<div class="math-cover"><span class="math-cover-label">覆盖度</span><div class="math-cover-bar"><i style="width:'+a.coverage+'%"></i></div><span class="math-cover-val">'+a.coverage+'%</span></div>';
+      // 理由
+      if(a.reason)html+='<div class="math-reason"><b class="s">理由：</b>'+escapeHtml(a.reason)+'</div>';
+      // 药材清单
+      html+='<div class="math-herbs">';
+      a.herbs.forEach(hd=>{
+        const inDb=hd.inDatabase===true;
+        html+='<div class="math-herb-chip '+(inDb?'':'missing')+'">';
+        html+='<span class="mh-dot" style="background:'+(inDb?'#5eead4':'#fcd34d')+'"></span>';
+        html+='<span class="mh-name">'+escapeHtml(hd.name)+'</span>';
+        if(hd.family&&hd.family!=='未知')html+='<span class="mh-fam">'+escapeHtml(hd.family)+'</span>';
+        html+='</div>';
+      });
+      html+='</div>';
+      // 详细
+      if(a.detail)html+='<div class="math-detail">'+escapeHtml(a.detail)+'</div>';
+      // 操作按钮
+      html+='<div class="math-actions">';
+      const missing=a.herbs.filter(h=>!h.inDatabase);
+      if(missing.length){
+        html+='<button class="math-btn add" data-math-add="add:'+i+'">+ 添加缺失的 '+missing.length+' 味药</button>';
+        html+='<button class="math-btn all" data-math-addall="add:'+i+'">+ 添加全部 '+a.herbs.length+' 味</button>';
+      }else{
+        html+='<button class="math-btn add" disabled>✓ 组合药物均已在图谱中</button>';
+      }
+      html+='</div>';
+      html+='</div>';
+    });
+    html+='</div>';
   }
+
+  // 减法
+  if(data.subtraction.length){
+    html+='<div class="math-section">';
+    html+='<div class="math-title sub">减法组合 · 去性方案</div>';
+    data.subtraction.forEach((s,i)=>{
+      html+='<div class="math-card sub" data-math-type="sub" data-math-idx="'+i+'">';
+      // 等式
+      html+='<div class="math-eq">';
+      html+='<span class="math-pill result">'+baseHerb.name+'</span>';
+      html+='<span class="math-op m">−</span>';
+      html+='<span class="math-pill '+(s.minusHerb.inDatabase?'':'missing')+'" data-math-herb="'+escapeAttr(s.minus)+'" data-math-role="minus">'+s.minus+'</span>';
+      html+='<span class="math-op e">≈</span>';
+      html+='<span class="math-pill '+(s.resultHerb.inDatabase?'':'missing')+'" data-math-herb="'+escapeAttr(s.result)+'" data-math-role="result">'+s.result+'</span>';
+      html+='</div>';
+      // 吻合度
+      html+='<div class="math-cover"><span class="math-cover-label">吻合度</span><div class="math-cover-bar"><i style="width:'+s.match+'%"></i></div><span class="math-cover-val">'+s.match+'%</span></div>';
+      if(s.reason)html+='<div class="math-reason"><b class="d">理由：</b>'+escapeHtml(s.reason)+'</div>';
+      // 药材清单
+      html+='<div class="math-herbs">';
+      [s.minusHerb,s.resultHerb].forEach((hd,idx)=>{
+        const role=idx===0?'减去':'等效';
+        const inDb=hd.inDatabase===true;
+        html+='<div class="math-herb-chip '+(inDb?'':'missing')+'">';
+        html+='<span class="mh-dot" style="background:'+(inDb?'#f472b6':'#fcd34d')+'"></span>';
+        html+='<span class="mh-name">'+escapeHtml(hd.name)+'</span>';
+        html+='<span class="mh-fam">'+role+'</span>';
+        if(hd.family&&hd.family!=='未知')html+='<span class="mh-fam">'+escapeHtml(hd.family)+'</span>';
+        html+='</div>';
+      });
+      html+='</div>';
+      if(s.detail)html+='<div class="math-detail">'+escapeHtml(s.detail)+'</div>';
+      html+='<div class="math-actions">';
+      const missing=[s.minusHerb,s.resultHerb].filter(h=>!h.inDatabase);
+      if(missing.length){
+        html+='<button class="math-btn add" data-math-add="sub:'+i+'">+ 添加缺失的 '+missing.length+' 味药</button>';
+      }else{
+        html+='<button class="math-btn add" disabled>✓ 相关药物均已在图谱中</button>';
+      }
+      html+='</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  html+='<div class="math-note">⚠️ <b>加减法分析基于药性理论推导</b>，组合与相减结果为AI推理所得，仅供组方思路参考，不可直接替代医嘱。实际使用需结合患者证型、剂量、煎服方法等综合判断。</div>';
+
+  aiOut.innerHTML=html;
+
+  // 绑定按钮
+  aiOut.querySelectorAll('[data-math-add]').forEach(btn=>{
+    btn.onclick=()=>{
+      const [type,idx]=btn.dataset.mathAdd.split(':');
+      addMathHerbs(type,parseInt(idx,10),false,btn);
+    };
+  });
+  aiOut.querySelectorAll('[data-math-addall]').forEach(btn=>{
+    btn.onclick=()=>{
+      const [type,idx]=btn.dataset.mathAddall.split(':');
+      addMathHerbs(type,parseInt(idx,10),true,btn);
+    };
+  });
+  // 点击药名定位（已在库中的）
+  aiOut.querySelectorAll('.math-pill,.math-herb-chip').forEach(el=>{
+    const name=el.dataset.mathHerb||el.querySelector('.mh-name')?.textContent;
+    if(!name)return;
+    const existing=HERBS.find(h=>h.name===name);
+    if(existing){
+      el.style.cursor='pointer';
+      el.onclick=()=>{const n=nodeIndex.get('herb:'+existing.id);if(n){focusNode(n);selectNode(n);switchTab('detail');}};
+    }
+  });
+}
+function escapeAttr(s){return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function addMathHerbs(type,idx,includeExisting,btn){
+  if(!lastMathData)return;
+  const data=lastMathData.data;
+  let herbs=[];
+  if(type==='add'){
+    const a=data.addition[idx];
+    if(!a)return;
+    herbs=includeExisting?a.herbs:a.herbs.filter(h=>!h.inDatabase);
+  }else{
+    const s=data.subtraction[idx];
+    if(!s)return;
+    herbs=[s.minusHerb,s.resultHerb].filter(h=>!h.inDatabase);
+  }
+  if(!herbs.length){toast('没有需要添加的药物');return;}
+  let added=0;
+  const addedIds=[];
+  for(const hd of herbs){
+    if(hd.inDatabase)continue;
+    try{
+      const herb=importHerbFromParsed(hd.rawHerb||hd);
+      hd.inDatabase=true;hd.herbId=herb.id;
+      added++;addedIds.push(herb.id);
+    }catch(e){console.error('添加失败:',e);}
+  }
+  if(added){
+    buildLegend();
+    toast('已添加 '+added+' 味药到图谱');
+    if(btn){btn.textContent='✓ 已添加 '+added+' 味';btn.disabled=true;}
+    setTimeout(()=>{const n=nodeIndex.get('herb:'+addedIds[addedIds.length-1]);if(n){focusNode(n);selectNode(n);cam.zoom=Math.min(cam.zoom,1.0);}},150);
+  }else{toast('添加失败，请检查数据');}
 }
 
 /* ====== AI 药性推断 ====== */
@@ -1432,15 +1554,10 @@ document.getElementById('btnAIInfer').onclick=async()=>{
   const hasImage=!!imageState.dataUrl;
   if(!total&&!hasImage){toast('请至少选择一项特征或上传一张植物照片');return;}
   const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
-  if(!apiKey){
-    if(infResult){infResult.classList.add('show');infResult.innerHTML='<div class="err">使用 AI 智能推断前，请先在「相似对比」面板中填入 API Key。<br><br>· 智谱清言：open.bigmodel.cn 控制台获取<br>· DeepSeek：platform.deepseek.com 控制台获取</div>';}
-    return;
-  }
+  if(!apiKey){if(infResult){infResult.classList.add('show');infResult.innerHTML='<div class="err">使用 AI 智能推断前，请先在「相似对比」面板中填入 API Key。</div>';}return;}
   const name=modelLabel();
   const prompt=buildInferPrompt(features,hasImage);
-  const loadingMsg=hasImage
-    ? name+(currentModel==='glm'?' 视觉模型':'')+' 正在结合图片与 '+total+' 项特征推断…'
-    : name+' 正在基于 '+total+' 项特征推断…';
+  const loadingMsg=hasImage?name+(currentModel==='glm'?' 视觉模型':'')+' 正在结合图片与 '+total+' 项特征推断…':name+' 正在基于 '+total+' 项特征推断…';
   if(infResult){infResult.classList.add('show');infResult.innerHTML='<div class="loading"><div class="spin"></div>'+loadingMsg+'</div>';}
   try{
     let text='';let usedModel=name;
@@ -1448,35 +1565,34 @@ document.getElementById('btnAIInfer').onclick=async()=>{
       if(currentModel==='glm'){
         text=await callGLMVision(apiKey,prompt,imageState.dataUrl,proxyInput?proxyInput.value.trim():'');
         usedModel='智谱清言（GLM-4V 视觉）';
-      } else {
+      }else{
         toast('DeepSeek 暂不支持图片识别，本次仅用文字特征推断');
         text=await callDeepSeek(apiKey,prompt,proxyInput?proxyInput.value.trim():'',SYS_INFER,2800);
         usedModel='DeepSeek（仅文字特征）';
       }
-    } else {
-      text=await callAI(prompt,SYS_INFER,2800);
-    }
+    }else{text=await callAI(prompt,SYS_INFER,2800);}
     if(infResult){
       const tag=hasImage&&currentModel==='glm'?'🖼 ':'';
       infResult.innerHTML='<div style="font-size:11px;color:#5d6b7d;margin-bottom:10px">'+tag+usedModel+' · 药性推断 · '+new Date().toLocaleTimeString('zh-CN')+'</div>'+mdToHtml(text);
     }
-  }catch(err){
-    if(infResult)infResult.innerHTML=renderAIError(err);
-  }
+  }catch(err){if(infResult)infResult.innerHTML=renderAIError(err);}
 };
 
 document.getElementById('runAI').onclick=()=>{
-  const herb=(selectedNode&&selectedNode.type==='herb')
-    ? selectedNode.data
-    : (selectedNode&&nodeIndex.get(selectedNode.parent)?nodeIndex.get(selectedNode.parent).data:null);
+  const herb=(selectedNode&&selectedNode.type==='herb')?selectedNode.data:(selectedNode&&nodeIndex.get(selectedNode.parent)?nodeIndex.get(selectedNode.parent).data:null);
   if(!herb){toast('请先在画布中选中一味药物');return;}
   runComparison(herb);
+};
+document.getElementById('runMath').onclick=()=>{
+  const herb=(selectedNode&&selectedNode.type==='herb')?selectedNode.data:(selectedNode&&nodeIndex.get(selectedNode.parent)?nodeIndex.get(selectedNode.parent).data:null);
+  if(!herb){toast('请先在画布中选中一味药物');return;}
+  runMathAnalysis(herb);
 };
 
 function renderAIError(err){
   const msg=String(err.message||err);
   if(msg==='NO_KEY')return'<div class="err">请先填写 API Key。</div>';
-  return'<div class="err"><strong>请求失败</strong><br><br>'+escapeHtml(msg)+'<br><br><strong>常见原因：</strong><br>· 浏览器跨域（CORS）限制 —— 可在「相似对比」面板填写代理地址<br>· API Key 无效或余额不足<br>· 网络不通<br>· 图片过大（建议 &lt;5MB）</div>';
+  return'<div class="err"><strong>请求失败</strong><br><br>'+escapeHtml(msg)+'<br><br><strong>常见原因：</strong><br>· 浏览器跨域（CORS）限制 —— 可在面板填写代理地址<br>· API Key 无效或余额不足<br>· 网络不通</div>';
 }
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function mdToHtml(md){
@@ -1500,7 +1616,7 @@ function mdToHtml(md){
 
 /* ========== 图谱导出 / 导入 ========== */
 function exportGraph(){
-  const data={app:'herb-atlas',version:'1.1',exportedAt:new Date().toISOString(),count:HERBS.length,herbs:HERBS};
+  const data={app:'herb-atlas',version:'1.2',exportedAt:new Date().toISOString(),count:HERBS.length,herbs:HERBS};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -1556,11 +1672,7 @@ async function importGraphFromFile(file){
 document.getElementById('btnExport').onclick=exportGraph;
 const fileLoadInput=document.getElementById('fileLoad');
 document.getElementById('btnLoad').onclick=()=>{if(fileLoadInput)fileLoadInput.click();};
-if(fileLoadInput)fileLoadInput.onchange=()=>{
-  const f=fileLoadInput.files&&fileLoadInput.files[0];
-  if(f)importGraphFromFile(f);
-  fileLoadInput.value='';
-};
+if(fileLoadInput)fileLoadInput.onchange=()=>{const f=fileLoadInput.files&&fileLoadInput.files[0];if(f)importGraphFromFile(f);fileLoadInput.value='';};
 
 /* ========== 药典文本解析 ========== */
 function parsePharmacopoeiaText(text){
@@ -1643,10 +1755,7 @@ function parseAIJson(raw){
   s=s.slice(start,end+1);
   let obj;
   try{obj=JSON.parse(s);}
-  catch(e){
-    s=s.replace(/,\s*([}\]])/g,'$1');
-    try{obj=JSON.parse(s);}catch(e2){throw new Error('AI 返回的 JSON 格式有误：'+e2.message);}
-  }
+  catch(e){s=s.replace(/,\s*([}\]])/g,'$1');try{obj=JSON.parse(s);}catch(e2){throw new Error('AI 返回的 JSON 格式有误：'+e2.message);}}
   if(!obj.herbs||!Array.isArray(obj.herbs))throw new Error('AI 返回结构缺少 herbs 数组');
   return obj.herbs;
 }
@@ -1671,13 +1780,7 @@ const nameTip=document.getElementById('nameTip');
 
 let parsedResult=null,parsedList=null,parseMode='rule',parseTimer=null,previewSource='rule';
 
-function openImportModal(){
-  if(!importModal)return;
-  importModal.classList.add('show');
-  if(importText)importText.value='';
-  resetImportState();
-  setTimeout(()=>{if(importText)importText.focus();},150);
-}
+function openImportModal(){if(!importModal)return;importModal.classList.add('show');if(importText)importText.value='';resetImportState();setTimeout(()=>{if(importText)importText.focus();},150);}
 function resetImportState(){
   if(importPreview)importPreview.classList.remove('show');
   if(importWarn)importWarn.classList.remove('show');
@@ -1704,15 +1807,8 @@ document.querySelectorAll('.pm').forEach(btn=>{
     document.querySelectorAll('.pm').forEach(x=>x.classList.remove('active'));
     btn.classList.add('active');
     parseMode=btn.dataset.mode;
-    if(parseMode==='ai'){
-      const text=importText.value.trim();
-      if(text.length>=10)doAIParse(text);
-      else{resetImportState();if(importInfo)importInfo.textContent='请先粘贴药典正文';}
-    }else{
-      const text=importText.value.trim();
-      if(text.length>=10)doRuleParse(text);
-      else resetImportState();
-    }
+    if(parseMode==='ai'){const text=importText.value.trim();if(text.length>=10)doAIParse(text);else{resetImportState();if(importInfo)importInfo.textContent='请先粘贴药典正文';}}
+    else{const text=importText.value.trim();if(text.length>=10)doRuleParse(text);else resetImportState();}
   };
 });
 function doRuleParse(text){
@@ -1725,11 +1821,7 @@ function doRuleParse(text){
 }
 async function doAIParse(text){
   const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
-  if(!apiKey){
-    showImportWarn('⚠ AI 解析需要 API Key。请先在「相似对比」面板中填入 Key，或切换回「快速规则解析」。');
-    if(previewBadge){previewBadge.textContent='等待 API Key';previewBadge.className='badge ai';}
-    return;
-  }
+  if(!apiKey){showImportWarn('⚠ AI 解析需要 API Key。请先在「相似对比」面板中填入 Key，或切换回「快速规则解析」。');if(previewBadge){previewBadge.textContent='等待 API Key';previewBadge.className='badge ai';}return;}
   resetImportState();
   if(importInfo)importInfo.textContent=modelLabel()+' 正在解析…';
   if(previewBadge){previewBadge.textContent='AI 解析中';previewBadge.className='badge ai';}
@@ -1831,18 +1923,14 @@ if(btnConfirmImport){
           else list=parsedList.filter((_,i)=>checkedIdx.has(i));
         }
       }else if(parsedResult){list=[parsedResult];}
-      else{toast('没有可导入的数据，请先粘贴药典正文并等待解析完成');return;}
+      else{toast('没有可导入的数据');return;}
       const manualName=(manualNameInput?manualNameInput.value.trim():'');
       if(manualName){
         if(list.length===1){list[0].name=manualName;if(!list[0].short)list[0].short=manualName.charAt(0);}
         else{list.forEach(p=>{if(!p.name){p.name=manualName;p.short=manualName.charAt(0);}});}
       }
       list=list.filter(p=>p&&p.name);
-      if(!list.length){
-        toast('请至少提供一味药的名称');
-        if(nameRow){nameRow.classList.add('err');nameRow.classList.remove('ok');if(nameTip)nameTip.textContent='请填写药名';if(manualNameInput)manualNameInput.focus();}
-        return;
-      }
+      if(!list.length){toast('请至少提供一味药的名称');if(nameRow){nameRow.classList.add('err');nameRow.classList.remove('ok');if(nameTip)nameTip.textContent='请填写药名';if(manualNameInput)manualNameInput.focus();}return;}
       let added=0,skipped=0;const addedIds=[];
       for(const p of list){
         try{const herb=importHerbFromParsed(p);added++;addedIds.push(herb.id);}
@@ -1852,7 +1940,7 @@ if(btnConfirmImport){
       if(added){
         toast('成功添加 '+added+' 味药'+(skipped?'，跳过 '+skipped+' 条':''));
         setTimeout(()=>{const n=nodeIndex.get('herb:'+addedIds[addedIds.length-1]);if(n){focusNode(n);selectNode(n);cam.zoom=Math.min(cam.zoom,1.0);}},120);
-      }else{toast('未能导入任何药物，请检查文本格式');}
+      }else{toast('未能导入任何药物');}
     }catch(err){console.error('导入过程出错:',err);toast('导入失败：'+(err.message||err));}
   };
 }
