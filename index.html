@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>本草图谱 · 中药属性探究与AI药性推断</title>
+<style>
+:root{--bg:#060910;--panel:rgba(13,19,28,.92);--border:rgba(255,255,255,.085);--text:#e8eef7;--muted:#8595a8;--gold:#f0b429;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+canvas{display:block;position:fixed;inset:0;cursor:grab;touch-action:none}
+canvas.grabbing{cursor:grabbing}
+.topbar{position:fixed;top:0;left:0;right:0;height:64px;z-index:20;display:flex;align-items:center;gap:20px;padding:0 20px;background:linear-gradient(180deg,rgba(6,9,16,.95),rgba(6,9,16,.55) 70%,transparent);pointer-events:none}
+.topbar>*{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:11px;flex-shrink:0}
+.logo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#f5c76a,#b8791a);color:#2a1a03;font-weight:800;font-size:19px;box-shadow:0 4px 16px rgba(240,180,41,.3)}
+.brand h1{font-size:15px;font-weight:700}
+.brand p{font-size:10.5px;color:var(--muted);margin-top:1px}
+.search{position:relative;flex:1;max-width:400px}
+.search input{width:100%;height:38px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.045);color:var(--text);font-size:13px;padding:0 14px 0 36px;outline:none;transition:.2s}
+.search input:focus{border-color:rgba(240,180,41,.5)}
+.search input::placeholder{color:#5d6b7d}
+.search::before{content:"⌕";position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#5d6b7d;font-size:16px;pointer-events:none}
+#searchResults{position:absolute;top:44px;left:0;right:0;max-height:300px;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:11px;backdrop-filter:blur(20px);display:none;padding:5px}
+#searchResults.show{display:block}
+.sr-item{padding:8px 11px;border-radius:7px;cursor:pointer;display:flex;gap:9px;align-items:center}
+.sr-item:hover{background:rgba(255,255,255,.06)}
+.sr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sr-name{font-size:13px;font-weight:600}
+.sr-meta{font-size:11px;color:var(--muted);margin-left:auto}
+.tools{display:flex;gap:6px;margin-left:auto}
+.tools button{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,.045);color:#b9c6d6;font-size:15px;cursor:pointer;display:grid;place-items:center;transition:.15s}
+.tools button:hover{background:rgba(255,255,255,.1);color:#fff}
+.tools button.import{width:auto;padding:0 13px;font-size:12px;font-weight:600;color:#a78bfa;border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.08)}
+.tools button.import:hover{background:rgba(167,139,250,.18);color:#c4b5fd}
+.tools button.io{width:auto;padding:0 12px;font-size:12px;font-weight:600;color:#5eead4;border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.06)}
+.tools button.io:hover{background:rgba(45,212,191,.15);color:#a7f3d0}
+.legend{position:fixed;left:16px;bottom:16px;z-index:15;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;backdrop-filter:blur(20px);max-width:210px}
+.legend h5{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px;font-weight:600}
+.legend-item{display:flex;align-items:center;gap:8px;padding:3.5px 0;cursor:pointer;font-size:12px;color:#b9c6d6;user-select:none;transition:.15s}
+.legend-item:hover{color:#fff}
+.legend-item.off{opacity:.32}
+.lg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
+.legend-item.off .lg-dot{box-shadow:none}
+.lg-count{margin-left:auto;font-size:10px;color:#5d6b7d;font-variant-numeric:tabular-nums}
+.side{position:fixed;right:16px;top:78px;bottom:16px;width:390px;z-index:18;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(22px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.tab{flex:1;height:46px;background:none;border:none;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;position:relative;transition:.2s;font-family:inherit}
+.tab:hover{color:#c9d5e4}
+.tab.active{color:var(--gold)}
+.tab.active::after{content:"";position:absolute;bottom:-1px;left:14%;right:14%;height:2px;background:var(--gold);border-radius:2px}
+.tab-body{flex:1;overflow-y:auto;padding:16px;display:none;scrollbar-width:thin}
+.tab-body.active{display:block}
+.tab-body::-webkit-scrollbar{width:6px}
+.tab-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px}
+.empty{color:#5d6b7d;font-size:12.5px;text-align:center;padding:50px 20px;line-height:1.8}
+.d-head{display:flex;gap:13px;align-items:center;margin-bottom:16px}
+.d-icon{width:52px;height:52px;border-radius:15px;flex-shrink:0;display:grid;place-items:center;font-size:23px;font-weight:800;color:#2a1a03;background:linear-gradient(145deg,#f7d183,#c98a1a);box-shadow:0 6px 20px rgba(240,180,41,.28)}
+.d-head h2{font-size:19px;font-weight:700}
+.d-head p{font-size:11.5px;color:var(--muted);margin-top:3px}
+.d-sec{margin-bottom:15px}
+.d-sec h4{font-size:10px;color:var(--muted);letter-spacing:1.6px;text-transform:uppercase;margin-bottom:7px;font-weight:600;display:flex;align-items:center;gap:6px}
+.d-sec h4::before{content:"";width:3px;height:10px;border-radius:2px;background:var(--gold);opacity:.7}
+.d-sec p{font-size:13px;line-height:1.65;color:#c9d5e4}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11.5px;padding:3.5px 9px;border-radius:7px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.075);color:#b9c6d6}
+.tag.c{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.25);color:#7dd3fc}
+.tag.p{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.25);color:#5eead4}
+.tag.e{background:rgba(244,114,182,.12);border-color:rgba(244,114,182,.25);color:#f9a8d4}
+.attr-head{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.attr-badge{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:600;letter-spacing:.5px}
+.attr-head h3{font-size:16px;font-weight:700}
+.rel-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.rel-chip{font-size:11.5px;padding:4px 10px;border-radius:7px;cursor:pointer;background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.28);color:#f0b429;transition:.15s}
+.rel-chip:hover{background:rgba(240,180,41,.22)}
+.ai-cfg{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.ai-cfg label{font-size:10.5px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;margin-bottom:-3px}
+.model-switch{display:flex;gap:6px}
+.ms{flex:1;height:34px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:#b9c6d6;font-size:12.5px;cursor:pointer;transition:.2s;font-weight:600;font-family:inherit}
+.ms:hover{background:rgba(255,255,255,.08)}
+.ms.active{background:rgba(240,180,41,.16);border-color:rgba(240,180,41,.5);color:var(--gold)}
+.ai-cfg input{height:36px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);font-size:12.5px;padding:0 12px;outline:none;font-family:inherit;transition:.2s}
+.ai-cfg input:focus{border-color:rgba(240,180,41,.5)}
+.ai-cfg input::placeholder{color:#4d5a6b}
+.btn-run{height:40px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#f0b429,#d98c10);color:#241703;font-size:13px;font-weight:700;font-family:inherit;letter-spacing:.5px;transition:.2s;margin-top:4px}
+.btn-run:hover:not(:disabled){filter:brightness(1.12);transform:translateY(-1px)}
+.btn-run:disabled{opacity:.45;cursor:not-allowed}
+.ai-out{font-size:12.5px;line-height:1.75;color:#c9d5e4;border-top:1px solid var(--border);padding-top:14px}
+.ai-out h1,.ai-out h2,.ai-out h3{font-size:13px;color:var(--gold);margin:16px 0 8px;font-weight:700}
+.ai-out h1:first-child,.ai-out h2:first-child,.ai-out h3:first-child{margin-top:0}
+.ai-out p{margin:7px 0}
+.ai-out ul{margin:7px 0;padding-left:17px}
+.ai-out li{margin:4px 0}
+.ai-out strong{color:#fff;font-weight:600}
+.ai-out code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;font-size:11.5px;color:#7dd3fc}
+.loading{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12.5px;padding:16px 0;justify-content:center}
+.spin{width:15px;height:15px;border:2px solid rgba(240,180,41,.25);border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.28);color:#fca5a5;padding:11px 13px;border-radius:9px;font-size:12px;line-height:1.6}
+.hint{font-size:11px;color:#5d6b7d;line-height:1.6;margin-top:9px}
+.inf-group{margin-bottom:14px}
+.inf-group>label{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;margin-bottom:7px}
+.inf-group>label::before{content:"";width:3px;height:9px;border-radius:2px;background:#a78bfa;opacity:.85}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11.5px;padding:5px 11px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);color:#a8b6c8;transition:.15s;font-family:inherit;user-select:none}
+.chip:hover{background:rgba(255,255,255,.09);color:#dfe8f2}
+.chip.on{background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.55);color:#c4b5fd;box-shadow:0 0 12px rgba(167,139,250,.18)}
+.chip .risk{color:#f87171;font-size:10px;margin-left:3px}
+.inf-result{margin-top:18px;border-top:1px solid var(--border);padding-top:15px;display:none}
+.inf-result.show{display:block}
+.res-card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 14px;margin-bottom:12px}
+.res-card h4{font-size:10px;color:#a78bfa;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.res-card h4::before{content:"◆";font-size:8px}
+.res-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:7px;font-size:12.5px}
+.res-key{color:#6b7a8d;flex-shrink:0;width:52px;font-size:11.5px;padding-top:1px}
+.res-val{color:#dbe6f2;line-height:1.55;flex:1}
+.res-val .hl{color:var(--gold);font-weight:600}
+.res-val .warn{color:#f87171;font-weight:600}
+.chain-item{display:flex;gap:9px;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.06);font-size:12px}
+.chain-item:last-child{border-bottom:none}
+.chain-badge{flex-shrink:0;width:56px;font-size:10px;padding:2px 0;text-align:center;border-radius:5px;height:18px;line-height:14px;font-weight:600}
+.chain-txt{flex:1;color:#b9c6d6;line-height:1.55}
+.chain-txt b{color:#fff;font-weight:600}
+.sim-herb{display:flex;align-items:center;gap:9px;padding:6px;cursor:pointer;border-radius:7px;transition:.15s}
+.sim-herb:hover{background:rgba(255,255,255,.05)}
+.sim-score{margin-left:auto;font-size:11px;color:#5d6b7d;font-variant-numeric:tabular-nums}
+.sim-bar{width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
+.sim-bar i{display:block;height:100%;background:linear-gradient(90deg,#a78bfa,#7c3aed);border-radius:2px}
+.conflict{background:rgba(251,191,36,.09);border:1px solid rgba(251,191,36,.3);color:#fcd34d;padding:10px 12px;border-radius:9px;font-size:11.5px;line-height:1.6;margin-bottom:12px}
+
+/* ==== 图片上传 ==== */
+.img-upload{margin-bottom:16px;padding:12px;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);border-radius:11px}
+.img-upload-title{font-size:10.5px;color:#7dd3fc;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.img-upload-title::before{content:"🖼";font-size:12px}
+.iu-drop{border:1.5px dashed rgba(56,189,248,.35);border-radius:9px;padding:16px 12px;text-align:center;cursor:pointer;transition:.2s;background:rgba(56,189,248,.03)}
+.iu-drop:hover,.iu-drop.drag{border-color:rgba(56,189,248,.7);background:rgba(56,189,248,.08)}
+.iu-drop .iu-icon{font-size:22px;display:block;margin-bottom:5px;opacity:.85}
+.iu-drop .iu-text{font-size:12px;color:#c9d5e4;display:block;margin-bottom:3px}
+.iu-drop .iu-hint{font-size:10.5px;color:#5d6b7d;display:block;line-height:1.5}
+.iu-preview{display:flex;gap:11px;align-items:center;padding:9px;background:rgba(255,255,255,.04);border:1px solid rgba(56,189,248,.28);border-radius:9px}
+.iu-preview img{width:74px;height:74px;object-fit:cover;border-radius:7px;flex-shrink:0;background:#000;border:1px solid rgba(255,255,255,.08)}
+.iu-info{flex:1;min-width:0}
+.iu-info .iu-name{display:block;font-size:12px;color:#fff;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
+.iu-info .iu-size{display:block;font-size:10.5px;color:#8595a8}
+.iu-remove{width:26px;height:26px;flex-shrink:0;border-radius:7px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.1);color:#fca5a5;font-size:13px;cursor:pointer;display:grid;place-items:center;transition:.15s}
+.iu-remove:hover{background:rgba(248,113,113,.22);color:#fff}
+.iu-loading{display:flex;align-items:center;gap:9px;padding:8px 0;font-size:12px;color:#8595a8;justify-content:center}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.modal-overlay.show{display:flex}
+.modal{width:720px;max-width:94vw;max-height:90vh;background:var(--panel);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.7);overflow:hidden}
+.modal-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-head h3{font-size:15px;font-weight:700}
+.modal-head .close{margin-left:auto;width:30px;height:30px;border-radius:8px;border:none;background:rgba(255,255,255,.06);color:#8595a8;font-size:16px;cursor:pointer;display:grid;place-items:center;transition:.15s}
+.modal-head .close:hover{background:rgba(255,255,255,.12);color:#fff}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.modal-body::-webkit-scrollbar{width:6px}
+.modal-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px}
+.import-hint{font-size:11.5px;color:#8595a8;line-height:1.7;padding:10px 13px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2);border-radius:10px;margin-bottom:14px}
+.import-hint a{color:#a78bfa;text-decoration:none}
+.import-hint a:hover{text-decoration:underline}
+.import-hint code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;font-size:10.5px;color:#c4b5fd}
+.parse-mode{display:flex;gap:8px;margin-bottom:12px;padding:8px 10px;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.18);border-radius:10px}
+.parse-mode .pm{flex:1;height:34px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:#a8b6c8;font-size:12px;cursor:pointer;transition:.2s;font-weight:600;font-family:inherit}
+.parse-mode .pm:hover{background:rgba(255,255,255,.08)}
+.parse-mode .pm.active{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.55);color:#7dd3fc}
+.name-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:9px 12px;background:rgba(240,180,41,.06);border:1px solid rgba(240,180,41,.2);border-radius:10px;transition:.2s}
+.name-row.ok{background:rgba(45,212,191,.06);border-color:rgba(45,212,191,.25)}
+.name-row.err{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3)}
+.name-row label{font-size:11px;color:#8595a8;font-weight:600;letter-spacing:.5px;flex-shrink:0;width:60px}
+.name-row input{flex:1;height:34px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);font-size:13px;padding:0 12px;outline:none;font-family:inherit;transition:.2s}
+.name-row input:focus{border-color:rgba(240,180,41,.6);background:rgba(255,255,255,.06)}
+.name-row.ok input{border-color:rgba(45,212,191,.35)}
+.name-row.err input{border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.06)}
+.name-row .name-tip{font-size:10.5px;color:#8595a8;flex-shrink:0}
+.name-row.ok .name-tip{color:#5eead4}
+.name-row.err .name-tip{color:#fca5a5}
+.modal textarea{width:100%;height:210px;border-radius:11px;border:1px solid var(--border);background:rgba(255,255,255,.035);color:var(--text);font-size:12.5px;padding:13px 15px;outline:none;resize:vertical;font-family:inherit;line-height:1.7;transition:.2s}
+.modal textarea:focus{border-color:rgba(167,139,250,.5)}
+.modal textarea::placeholder{color:#4d5a6b}
+.import-preview{margin-top:14px;padding:13px 15px;border-radius:11px;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);display:none}
+.import-preview.show{display:block}
+.import-preview h4{font-size:10px;color:#5eead4;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.import-preview h4 .badge{font-size:9px;padding:2px 7px;border-radius:5px;letter-spacing:.5px}
+.badge.rule{background:rgba(45,212,191,.18);color:#5eead4}
+.badge.ai{background:rgba(167,139,250,.2);color:#c4b5fd}
+.ip-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px;font-size:12px}
+.ip-item{display:flex;gap:7px}
+.ip-key{color:#6b7a8d;flex-shrink:0;width:48px;font-size:11px}
+.ip-val{color:#dbe6f2;word-break:break-all}
+.import-warn{margin-top:12px;padding:10px 13px;border-radius:9px;font-size:11.5px;line-height:1.6;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);color:#fcd34d;display:none}
+.import-warn.show{display:block}
+.multi-list{margin-top:12px;padding:12px 14px;border-radius:11px;background:rgba(240,180,41,.06);border:1px solid rgba(240,180,41,.2);display:none}
+.multi-list.show{display:block}
+.multi-list h5{font-size:10px;color:#f0b429;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:9px}
+.multi-item{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;background:rgba(255,255,255,.035);margin-bottom:5px;font-size:12px}
+.multi-item:last-child{margin-bottom:0}
+.multi-item .mi-name{font-weight:700;color:#fff;flex-shrink:0;min-width:56px}
+.multi-item .mi-meta{color:#8595a8;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.multi-item .mi-check{width:16px;height:16px;flex-shrink:0;cursor:pointer;accent-color:#a78bfa}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;align-items:center}
+.modal-foot .info{font-size:11px;color:#5d6b7d;margin-right:auto}
+.modal-foot button{height:38px;padding:0 20px;border-radius:9px;border:none;cursor:pointer;font-size:12.5px;font-weight:700;font-family:inherit;transition:.2s}
+.modal-foot .cancel{background:rgba(255,255,255,.06);color:#8595a8}
+.modal-foot .cancel:hover{background:rgba(255,255,255,.12)}
+.modal-foot .ai-parse{background:linear-gradient(135deg,#38bdf8,#0284c7);color:#031722}
+.modal-foot .ai-parse:hover:not(:disabled){filter:brightness(1.12);transform:translateY(-1px)}
+.modal-foot .ai-parse:disabled{opacity:.45;cursor:not-allowed}
+.modal-foot .confirm{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff}
+.modal-foot .confirm:hover:not(:disabled){filter:brightness(1.12);transform:translateY(-1px)}
+.modal-foot .confirm:disabled{opacity:.4;cursor:not-allowed}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(14px);background:rgba(20,28,40,.96);border:1px solid var(--border);color:#d4e0ee;padding:10px 20px;border-radius:11px;font-size:12.5px;z-index:200;backdrop-filter:blur(16px);opacity:0;transition:.3s;pointer-events:none;box-shadow:0 10px 34px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:900px){.side{right:8px;left:8px;width:auto;top:70px;bottom:8px}.legend{display:none}.brand p{display:none}.tools button.import{width:36px;padding:0;font-size:15px}.tools button.import .txt{display:none}.tools button.io{width:36px;padding:0;font-size:15px}.tools button.io .txt{display:none}.modal{width:94vw}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div class="topbar">
+  <div class="brand"><div class="logo">本</div><div><h1>本草图谱</h1><p>中药属性 · AI药性推断</p></div></div>
+  <div class="search"><input id="searchInput" placeholder="搜索药物 / 功效 / 化学成分…" autocomplete="off"><div id="searchResults"></div></div>
+  <div class="tools">
+    <button class="io" id="btnExport" title="导出图谱为 JSON 文件">⬇ <span class="txt">导出</span></button>
+    <button class="io" id="btnLoad" title="从 JSON 文件导入图谱">⬆ <span class="txt">导入</span></button>
+    <button class="import" id="btnImport" title="从药典文本导入药物">📋 <span class="txt">药典</span></button>
+    <button id="btnFit" title="适应视图 (F)">⤢</button>
+    <button id="btnReset" title="重置视图">⟲</button>
+  </div>
+</div>
+<input type="file" id="fileLoad" accept=".json,application/json" style="display:none">
+
+<div class="legend" id="legend"></div>
+
+<aside class="side" id="side">
+  <div class="tabs">
+    <button class="tab active" data-tab="detail">节点详情</button>
+    <button class="tab" data-tab="infer">药性推断</button>
+    <button class="tab" data-tab="ai">AI 对比</button>
+  </div>
+  <div class="tab-body active" id="tabDetail"><div class="empty">点击画布中的任意节点<br>查看其属性与关联</div></div>
+  <div class="tab-body" id="tabInfer">
+    <div style="font-size:12px;color:#8595a8;line-height:1.65;margin-bottom:14px;padding:11px 13px;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2);border-radius:10px">
+      <b style="color:#c4b5fd">取象比类 · 以形推性</b><br>上传植物照片并勾选形态特征，AI 将结合图像与中药共性规律，推断其可能的药性。
+    </div>
+
+    <!-- 图片上传 -->
+    <div class="img-upload">
+      <div class="img-upload-title">植物照片（选填）</div>
+      <div class="iu-drop" id="iuDrop">
+        <span class="iu-icon">🖼</span>
+        <span class="iu-text">点击、拖拽或粘贴图片</span>
+        <span class="iu-hint">AI 将结合图像特征参与药性推断 · 支持 JPG/PNG，建议 &lt;5MB</span>
+      </div>
+      <input type="file" id="imgFile" accept="image/*" style="display:none">
+      <div class="iu-preview" id="iuPreview" style="display:none">
+        <img id="iuImg" alt="预览">
+        <div class="iu-info">
+          <span class="iu-name" id="iuName">图片</span>
+          <span class="iu-size" id="iuSize"></span>
+        </div>
+        <button class="iu-remove" id="iuRemove" title="移除图片">✕</button>
+      </div>
+    </div>
+
+    <div id="infForm"></div>
+    <button class="btn-run" id="btnInfer" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff">规则引擎推断</button>
+    <button class="btn-run" id="btnAIInfer" style="background:linear-gradient(135deg,#38bdf8,#0284c7);color:#031722;margin-top:8px">🤖 AI 智能推断</button>
+    <button class="btn-run" id="btnClearInf" style="background:rgba(255,255,255,.06);color:#8595a8;border:1px solid var(--border);margin-top:6px;height:34px;font-size:12px">清空选择</button>
+    <div class="inf-result" id="infResult"></div>
+  </div>
+  <div class="tab-body" id="tabAI">
+    <div class="ai-cfg">
+      <label>大模型</label>
+      <div class="model-switch">
+        <button class="ms active" data-model="glm">智谱清言</button>
+        <button class="ms" data-model="deepseek">DeepSeek</button>
+      </div>
+      <label>API Key</label>
+      <input type="password" id="apiKey" placeholder="粘贴你的 API Key">
+      <label>代理地址（可选，解决跨域）</label>
+      <input type="text" id="proxyUrl" placeholder="https://your-proxy.com/v1">
+      <button class="btn-run" id="runAI">开始对比分析</button>
+      <div class="hint">AI 会将自身知识与《中国药典》2020年版逐项核对。此 Key 同时用于药典导入、药性推断与图像识别。</div>
+    </div>
+    <div class="ai-out" id="aiOut"><div class="empty" style="padding:26px 10px">选中一味药后<br>点击上方按钮开始分析</div></div>
+  </div>
+</aside>
+
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-head"><h3>📋 从药典文本导入药物</h3><button class="close" id="btnCloseImport">✕</button></div>
+    <div class="modal-body">
+      <div class="import-hint">
+        打开 <a href="https://db2.ouryao.com/yd2025/index.php?cid=1" target="_blank" rel="noopener">中国药典2025在线版</a>，找到目标药物页面，<b>选中正文并复制</b>，粘贴到下方文本框。<br>
+        支持一次粘贴多味药的正文（以药名标题分隔），AI 会自动识别并逐条解析。
+      </div>
+      <div class="parse-mode">
+        <button class="pm active" data-mode="rule">⚡ 快速规则解析</button>
+        <button class="pm" data-mode="ai">🤖 AI 智能解析（推荐）</button>
+      </div>
+      <textarea id="importText" placeholder="在此粘贴从药典网站复制的药物正文…
+
+示例：
+延胡索
+本品为罂粟科植物延胡索Corydalis yanhusuo W. T. Wang的干燥块茎。
+〖性味与归经〗 辛、苦，温。归肝、脾经。
+〖功能与主治〗 活血，行气，止痛。用于胸胁、脘腹疼痛，胸痹心痛，经闭痛经，产后瘀阻，跌扑肿痛。
+〖含量测定〗 本品按干燥品计算，含延胡索乙素（C₂₁H₂₅NO₄）不得少于0.050%。"></textarea>
+      <div class="name-row" id="nameRow" style="margin-top:12px">
+        <label>药物名称</label>
+        <input type="text" id="manualName" placeholder="解析不出药名时请手动输入">
+        <span class="name-tip" id="nameTip">自动识别</span>
+      </div>
+      <div class="import-preview" id="importPreview">
+        <h4>解析预览 <span class="badge rule" id="previewBadge">规则引擎</span></h4>
+        <div class="ip-grid" id="ipGrid"></div>
+      </div>
+      <div class="multi-list" id="multiList"></div>
+      <div class="import-warn" id="importWarn"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="info" id="importInfo"></span>
+      <button class="cancel" id="btnCancelImport">取消</button>
+      <button class="ai-parse" id="btnAIParse">🤖 AI 智能解析</button>
+      <button class="confirm" id="btnConfirmImport" disabled>添加到图谱</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========== 1. 中药知识库 (45味) ========== */
+const HERBS=[
+{id:'renshen',name:'人参',short:'参',family:'五加科',part:'根及根茎',nature:'甘、微苦，微温',meridians:['脾','肺','心','肾'],effects:['大补元气','复脉固脱','补脾益肺','生津养血','安神益智'],compounds:['人参皂苷Rg1','人参皂苷Rb1','人参多糖','人参挥发油'],pharma:['抗疲劳','增强免疫','改善记忆','调节心血管']},
+{id:'huangqi',name:'黄芪',short:'芪',family:'豆科',part:'根',nature:'甘，微温',meridians:['肺','脾'],effects:['补气升阳','固表止汗','利水消肿','生津养血','行滞通痹'],compounds:['黄芪甲苷','黄芪多糖','毛蕊异黄酮','芒柄花素'],pharma:['增强免疫','抗氧化','抗炎','保护心血管']},
+{id:'danggui',name:'当归',short:'归',family:'伞形科',part:'根',nature:'甘、辛，温',meridians:['肝','心','脾'],effects:['补血活血','调经止痛','润肠通便'],compounds:['阿魏酸','藁本内酯','当归多糖','当归挥发油'],pharma:['促进造血','抗凝血','调节免疫','抗炎']},
+{id:'gancao',name:'甘草',short:'甘',family:'豆科',part:'根及根茎',nature:'甘，平',meridians:['心','肺','脾','胃'],effects:['补脾益气','清热解毒','祛痰止咳','缓急止痛','调和诸药'],compounds:['甘草酸','甘草苷','甘草素','甘草多糖'],pharma:['抗炎','抗溃疡','保肝','解毒']},
+{id:'baishao',name:'白芍',short:'芍',family:'毛茛科',part:'根',nature:'苦、酸，微寒',meridians:['肝','脾'],effects:['养血调经','敛阴止汗','柔肝止痛','平抑肝阳'],compounds:['芍药苷','苯甲酰芍药苷','芍药内酯苷'],pharma:['解痉','镇痛','抗炎','调节免疫']},
+{id:'chuanxiong',name:'川芎',short:'芎',family:'伞形科',part:'根茎',nature:'辛，温',meridians:['肝','胆','心包'],effects:['活血行气','祛风止痛'],compounds:['川芎嗪','阿魏酸','藁本内酯','川芎内酯'],pharma:['扩张血管','抗血小板聚集','改善微循环','镇静']},
+{id:'danshen',name:'丹参',short:'丹',family:'唇形科',part:'根及根茎',nature:'苦，微寒',meridians:['心','肝'],effects:['活血祛瘀','通经止痛','清心除烦','凉血消肿'],compounds:['丹参酮ⅡA','丹酚酸B','隐丹参酮','丹参素'],pharma:['保护心肌','抗血栓','抗氧化','抗纤维化']},
+{id:'huanglian',name:'黄连',short:'连',family:'毛茛科',part:'根茎',nature:'苦，寒',meridians:['心','脾','胃','肝','胆','大肠'],effects:['清热燥湿','泻火解毒'],compounds:['小檗碱','黄连碱','巴马汀','药根碱'],pharma:['抗菌','抗炎','降血糖','调节肠道菌群']},
+{id:'huangqin',name:'黄芩',short:'芩',family:'唇形科',part:'根',nature:'苦，寒',meridians:['肺','胆','脾','胃','大肠'],effects:['清热燥湿','泻火解毒','止血','安胎'],compounds:['黄芩苷','黄芩素','汉黄芩素','汉黄芩苷'],pharma:['抗菌','抗病毒','抗炎','保肝']},
+{id:'jinyinhua',name:'金银花',short:'银',family:'忍冬科',part:'花蕾',nature:'甘，寒',meridians:['肺','心','胃'],effects:['清热解毒','疏散风热'],compounds:['绿原酸','木犀草苷','异绿原酸','金银花挥发油'],pharma:['抗菌','抗病毒','解热','抗炎']},
+{id:'lianqiao',name:'连翘',short:'翘',family:'木犀科',part:'果实',nature:'苦，微寒',meridians:['肺','心','小肠'],effects:['清热解毒','消肿散结','疏散风热'],compounds:['连翘苷','连翘酯苷A','齐墩果酸','连翘挥发油'],pharma:['抗菌','抗病毒','解热','抗炎']},
+{id:'mahuang',name:'麻黄',short:'麻',family:'麻黄科',part:'草质茎',nature:'辛、微苦，温',meridians:['肺','膀胱'],effects:['发汗解表','宣肺平喘','利水消肿'],compounds:['麻黄碱','伪麻黄碱','麻黄挥发油','麻黄黄酮'],pharma:['平喘','发汗','利尿','兴奋中枢']},
+{id:'guizhi',name:'桂枝',short:'桂',family:'樟科',part:'嫩枝',nature:'辛、甘，温',meridians:['心','肺','膀胱'],effects:['发汗解肌','温通经脉','助阳化气'],compounds:['桂皮醛','桂皮酸','桂枝挥发油','香豆素'],pharma:['解热','抗炎','扩张血管','抗菌']},
+{id:'bohe',name:'薄荷',short:'薄',family:'唇形科',part:'叶',nature:'辛，凉',meridians:['肺','肝'],effects:['疏散风热','清利头目','利咽透疹','疏肝行气'],compounds:['薄荷醇','薄荷酮','乙酸薄荷酯','薄荷挥发油'],pharma:['解热','抗炎','镇痛','利胆']},
+{id:'chaihu',name:'柴胡',short:'柴',family:'伞形科',part:'根',nature:'辛、苦，微寒',meridians:['肝','胆','肺'],effects:['疏散退热','疏肝解郁','升举阳气'],compounds:['柴胡皂苷a','柴胡皂苷d','柴胡挥发油','柴胡多糖'],pharma:['解热','抗炎','保肝','调节免疫']},
+{id:'banxia',name:'半夏',short:'半',family:'天南星科',part:'块茎',nature:'辛，温；有毒',meridians:['脾','胃','肺'],effects:['燥湿化痰','降逆止呕','消痞散结'],compounds:['半夏生物碱','半夏多糖','半夏有机酸','半夏挥发油'],pharma:['镇咳','止呕','抗肿瘤','抗炎']},
+{id:'chenpi',name:'陈皮',short:'陈',family:'芸香科',part:'果皮',nature:'辛、苦，温',meridians:['脾','肺'],effects:['理气健脾','燥湿化痰'],compounds:['橙皮苷','川陈皮素','陈皮挥发油','辛弗林'],pharma:['促消化','祛痰','抗炎','抗氧化']},
+{id:'fuling',name:'茯苓',short:'茯',family:'多孔菌科',part:'菌核',nature:'甘、淡，平',meridians:['心','肺','脾','肾'],effects:['利水渗湿','健脾','宁心'],compounds:['茯苓多糖','茯苓三萜','茯苓酸','麦角甾醇'],pharma:['利尿','增强免疫','抗肿瘤','镇静']},
+{id:'baizhu',name:'白术',short:'术',family:'菊科',part:'根茎',nature:'苦、甘，温',meridians:['脾','胃'],effects:['健脾益气','燥湿利水','止汗','安胎'],compounds:['白术内酯Ⅰ','白术内酯Ⅲ','苍术酮','白术多糖'],pharma:['调节胃肠','利尿','增强免疫','抗炎']},
+{id:'shanyao',name:'山药',short:'药',family:'薯蓣科',part:'根茎',nature:'甘，平',meridians:['脾','肺','肾'],effects:['补脾养胃','生津益肺','补肾涩精'],compounds:['薯蓣皂苷','山药多糖','尿囊素','山药多酚'],pharma:['调节免疫','降血糖','抗氧化','调节肠道']},
+{id:'gouqizi',name:'枸杞子',short:'杞',family:'茄科',part:'果实',nature:'甘，平',meridians:['肝','肾'],effects:['滋补肝肾','益精明目'],compounds:['枸杞多糖','甜菜碱','玉米黄质','胡萝卜素'],pharma:['抗氧化','增强免疫','降血糖','保肝']},
+{id:'dihuang',name:'地黄',short:'地',family:'玄参科',part:'块根',nature:'甘，寒',meridians:['心','肝','肾'],effects:['清热凉血','养阴生津'],compounds:['梓醇','地黄多糖','毛蕊花糖苷','地黄素'],pharma:['调节免疫','降血糖','抗炎','保护神经']},
+{id:'dahuang',name:'大黄',short:'黄',family:'蓼科',part:'根及根茎',nature:'苦，寒',meridians:['脾','胃','大肠','肝','心包'],effects:['泻下攻积','清热泻火','凉血解毒','逐瘀通经'],compounds:['大黄素','大黄酸','番泻苷','大黄酚'],pharma:['泻下','抗菌','抗炎','保肝']},
+{id:'fuzi',name:'附子',short:'附',family:'毛茛科',part:'子根',nature:'辛、甘，大热；有毒',meridians:['心','肾','脾'],effects:['回阳救逆','补火助阳','散寒止痛'],compounds:['乌头碱','次乌头碱','新乌头碱','附子多糖'],pharma:['强心','抗炎','镇痛','改善循环']},
+{id:'ganjiang',name:'干姜',short:'姜',family:'姜科',part:'根茎',nature:'辛，热',meridians:['脾','胃','肾','心','肺'],effects:['温中散寒','回阳通脉','温肺化饮'],compounds:['姜辣素','姜烯酚','干姜挥发油','姜酮'],pharma:['温中','抗炎','抗氧化','保护胃黏膜']},
+{id:'wuweizi',name:'五味子',short:'味',family:'木兰科',part:'果实',nature:'酸、甘，温',meridians:['肺','心','肾'],effects:['收敛固涩','益气生津','补肾宁心'],compounds:['五味子醇甲','五味子甲素','五味子多糖','五味子挥发油'],pharma:['保肝','镇静','抗氧化','增强免疫']},
+{id:'shanzha',name:'山楂',short:'楂',family:'蔷薇科',part:'果实',nature:'酸、甘，微温',meridians:['脾','胃','肝'],effects:['消食健胃','行气散瘀','化浊降脂'],compounds:['山楂酸','枸橼酸','山楂黄酮','山楂三萜'],pharma:['促消化','降血脂','保护心血管','抗氧化']},
+{id:'juhua',name:'菊花',short:'菊',family:'菊科',part:'头状花序',nature:'甘、苦，微寒',meridians:['肺','肝'],effects:['散风清热','平肝明目','清热解毒'],compounds:['木犀草苷','绿原酸','菊花多糖','菊花挥发油'],pharma:['抗菌','抗炎','降压','抗氧化']},
+{id:'jiegeng',name:'桔梗',short:'桔',family:'桔梗科',part:'根',nature:'苦、辛，平',meridians:['肺'],effects:['宣肺利咽','祛痰排脓'],compounds:['桔梗皂苷D','桔梗多糖','桔梗挥发油','菊糖'],pharma:['祛痰','镇咳','抗炎','增强免疫']},
+{id:'suanzaoren',name:'酸枣仁',short:'枣',family:'鼠李科',part:'种子',nature:'甘、酸，平',meridians:['肝','胆','心'],effects:['养心补肝','宁心安神','敛汗生津'],compounds:['酸枣仁皂苷A','酸枣仁皂苷B','酸枣仁黄酮','酸枣仁脂肪油'],pharma:['镇静催眠','抗焦虑','抗心律失常','增强免疫']},
+{id:'shengma',name:'升麻',short:'升',family:'毛茛科',part:'根茎',nature:'辛、微甘，微寒',meridians:['肺','脾','胃','大肠'],effects:['发表透疹','清热解毒','升举阳气'],compounds:['升麻素','异阿魏酸','咖啡酸','升麻多糖'],pharma:['解热','抗炎','抗病毒','调节免疫']},
+{id:'gegen',name:'葛根',short:'葛',family:'豆科',part:'根',nature:'甘、辛，凉',meridians:['脾','胃','肺'],effects:['解肌退热','生津止渴','升阳止泻','通经活络','解酒毒'],compounds:['葛根素','大豆苷','大豆苷元','葛根多糖'],pharma:['解热','扩张血管','改善微循环','降血糖']},
+{id:'zhimu',name:'知母',short:'知',family:'百合科',part:'根茎',nature:'苦、甘，寒',meridians:['肺','胃','肾'],effects:['清热泻火','滋阴润燥'],compounds:['知母皂苷','芒果苷','知母多糖','新芒果苷'],pharma:['解热','抗炎','降血糖','保护神经']},
+{id:'shigao',name:'石膏',short:'膏',family:'矿物类',part:'矿物',nature:'甘、辛，大寒',meridians:['肺','胃'],effects:['清热泻火','除烦止渴','收湿生肌'],compounds:['含水硫酸钙','微量元素'],pharma:['解热','抗炎','镇静','增强免疫']},
+{id:'zhizi',name:'栀子',short:'栀',family:'茜草科',part:'果实',nature:'苦，寒',meridians:['心','肺','三焦'],effects:['泻火除烦','清热利湿','凉血解毒','消肿止痛'],compounds:['栀子苷','京尼平苷','绿原酸','栀子黄素'],pharma:['解热','抗炎','利胆','保肝']},
+{id:'yuxingcao',name:'鱼腥草',short:'腥',family:'三白草科',part:'全草',nature:'辛，微寒',meridians:['肺'],effects:['清热解毒','消痈排脓','利尿通淋'],compounds:['癸酰乙醛','鱼腥草素','槲皮苷','挥发油'],pharma:['抗菌','抗病毒','抗炎','增强免疫']},
+{id:'baihuasheshecao',name:'白花蛇舌草',short:'蛇',family:'茜草科',part:'全草',nature:'苦、甘，寒',meridians:['胃','大肠','小肠'],effects:['清热解毒','利湿通淋'],compounds:['齐墩果酸','熊果酸','车叶草苷','多糖'],pharma:['抗肿瘤','抗菌','抗炎','增强免疫']},
+{id:'dangshen',name:'党参',short:'党',family:'桔梗科',part:'根',nature:'甘，平',meridians:['脾','肺'],effects:['健脾益肺','养血生津'],compounds:['党参苷','党参多糖','苍术内酯','生物碱'],pharma:['增强免疫','调节胃肠','抗疲劳','改善贫血']},
+{id:'taizishen',name:'太子参',short:'太',family:'石竹科',part:'块根',nature:'甘、微苦，平',meridians:['脾','肺'],effects:['益气健脾','生津润肺'],compounds:['太子参皂苷','太子参多糖','氨基酸','微量元素'],pharma:['增强免疫','抗疲劳','抗氧化','调节胃肠']},
+{id:'mudanpi',name:'牡丹皮',short:'牡',family:'毛茛科',part:'根皮',nature:'苦、辛，微寒',meridians:['心','肝','肾'],effects:['清热凉血','活血化瘀'],compounds:['丹皮酚','芍药苷','丹皮多糖','苯甲酰芍药苷'],pharma:['解热','抗炎','抗血栓','保护心血管']},
+{id:'xiangfu',name:'香附',short:'香',family:'莎草科',part:'根茎',nature:'辛、微苦、微甘，平',meridians:['肝','脾','三焦'],effects:['疏肝解郁','理气宽中','调经止痛'],compounds:['香附子烯','α-香附酮','香附醇','挥发油'],pharma:['解痉','镇痛','抗炎','调节内分泌']},
+{id:'yujin',name:'郁金',short:'郁',family:'姜科',part:'块根',nature:'辛、苦，寒',meridians:['肝','心','肺'],effects:['活血止痛','行气解郁','清心凉血','利胆退黄'],compounds:['姜黄素','郁金二酮','挥发油','多糖'],pharma:['保肝','利胆','抗凝血','抗氧化']},
+{id:'jianghuang',name:'姜黄',short:'黄',family:'姜科',part:'根茎',nature:'辛、苦，温',meridians:['肝','脾'],effects:['破血行气','通经止痛'],compounds:['姜黄素','去甲氧基姜黄素','挥发油','姜黄多糖'],pharma:['抗炎','抗氧化','抗肿瘤','降血脂']},
+{id:'yejiaoteng',name:'夜交藤',short:'夜',family:'蓼科',part:'藤茎',nature:'甘，平',meridians:['心','肝'],effects:['养心安神','祛风通络'],compounds:['大黄素','大黄素甲醚','夜交藤苷','多糖'],pharma:['镇静催眠','降血脂','抗菌','增强免疫']},
+{id:'yuanzhi',name:'远志',short:'远',family:'远志科',part:'根',nature:'苦、辛，温',meridians:['心','肾','肺'],effects:['安神益智','交通心肾','祛痰消肿'],compounds:['远志皂苷','远志酮','远志多糖','3,6\'-二芥子酰基蔗糖'],pharma:['镇静','抗焦虑','祛痰','改善记忆']}
+];
+
+/* ========== 2. 节点样式 ========== */
+const NODE_STYLE={herb:{color:'#f0b429',r:36,label:'药物'},part:{color:'#84cc16',r:12,label:'药用部位'},nature:{color:'#f87171',r:12,label:'性味'},meridian:{color:'#c084fc',r:12,label:'归经'},effect:{color:'#f472b6',r:12,label:'功效'},compound:{color:'#38bdf8',r:12,label:'化学成分'},pharma:{color:'#2dd4bf',r:12,label:'药理作用'}};
+const TYPE_ORDER=['herb','part','nature','meridian','effect','compound','pharma'];
+
+/* ========== 3. 全局状态 ========== */
+const TAU=Math.PI*2;
+const nodes=[],edges=[],nodeIndex=new Map();
+const expanded=new Set(HERBS.map(h=>h.id));
+const typeVisible={};TYPE_ORDER.forEach(t=>typeVisible[t]=true);
+const SX=400,SY=400,COLS=7;
+
+/* 图片状态 */
+const imageState={dataUrl:'',name:'',size:0,width:0,height:0};
+
+/* ========== 4. 图构建 ========== */
+function getPos(i,total){const rows=Math.max(1,Math.ceil(total/COLS));const ox=-(COLS-1)/2*SX;const oy=-(rows-1)/2*SY;return{x:ox+(i%COLS)*SX,y:oy+Math.floor(i/COLS)*SY};}
+function addHerbToGraph(h,index,total){
+  const p=getPos(index,total);
+  const hn={id:'herb:'+h.id,type:'herb',label:h.name,glyph:h.short,herbId:h.id,data:h,x:p.x,y:p.y,homeX:p.x,homeY:p.y,alpha:1};
+  nodes.push(hn);nodeIndex.set(hn.id,hn);
+  const attrs=[];
+  attrs.push({type:'part',label:h.part});
+  attrs.push({type:'nature',label:h.nature});
+  (h.meridians||[]).forEach(m=>attrs.push({type:'meridian',label:m+'经'}));
+  (h.effects||[]).forEach(e=>attrs.push({type:'effect',label:e}));
+  (h.compounds||[]).forEach(c=>attrs.push({type:'compound',label:c}));
+  (h.pharma||[]).forEach(p=>attrs.push({type:'pharma',label:p}));
+  const n=attrs.length||1;
+  attrs.forEach((a,j)=>{
+    const ang=-Math.PI/2+(j/n)*TAU;
+    const rad=108+(j%2)*66;
+    const nd={id:'attr:'+h.id+':'+j,type:a.type,label:a.label,herbId:h.id,parent:hn.id,x:p.x,y:p.y,homeX:p.x+Math.cos(ang)*rad,homeY:p.y+Math.sin(ang)*rad,alpha:0};
+    nodes.push(nd);nodeIndex.set(nd.id,nd);
+    edges.push({source:hn.id,target:nd.id,herbId:h.id});
+  });
+  expanded.add(h.id);
+  return hn;
+}
+function buildGraph(){const total=HERBS.length;HERBS.forEach((h,i)=>addHerbToGraph(h,i,total));}
+
+/* ========== 5. 画布引擎 ========== */
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=window.innerWidth,H=window.innerHeight,DPR=1;
+const cam={x:0,y:0,zoom:1};
+function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;cv.width=Math.floor(W*DPR);cv.height=Math.floor(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';}
+function s2w(sx,sy){return{x:(sx-W/2)/cam.zoom+cam.x,y:(sy-H/2)/cam.zoom+cam.y};}
+function rgba(hex,a){const n=parseInt(hex.slice(1),16);return`rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+let pulse=0;
+function render(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
+  const bg=ctx.createRadialGradient(W*.5,H*.45,0,W*.5,H*.45,Math.max(W,H)*.8);
+  bg.addColorStop(0,'#0b1220');bg.addColorStop(1,'#05070c');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(W/2,H/2);ctx.scale(cam.zoom,cam.zoom);ctx.translate(-cam.x,-cam.y);
+  const halfW=W/2/cam.zoom,halfH=H/2/cam.zoom;
+  const view={l:cam.x-halfW,r:cam.x+halfW,t:cam.y-halfH,b:cam.y+halfH};
+  drawGrid(view);drawEdges(view);drawNodes(view);
+  ctx.restore();
+}
+function drawGrid(v){
+  let gs=100;while(gs*cam.zoom<42)gs*=2;while(gs*cam.zoom>220)gs/=2;
+  ctx.strokeStyle='rgba(110,150,210,.05)';ctx.lineWidth=1/cam.zoom;ctx.beginPath();
+  for(let x=Math.floor(v.l/gs)*gs;x<=v.r;x+=gs){ctx.moveTo(x,v.t);ctx.lineTo(x,v.b);}
+  for(let y=Math.floor(v.t/gs)*gs;y<=v.b;y+=gs){ctx.moveTo(v.l,y);ctx.lineTo(v.r,y);}
+  ctx.stroke();
+}
+function drawEdges(v){
+  const pad=60;ctx.lineCap='round';
+  for(const e of edges){
+    const a=nodeIndex.get(e.source),b=nodeIndex.get(e.target);
+    if(!a||!b)continue;
+    const alpha=Math.min(a.alpha,b.alpha);if(alpha<0.04)continue;
+    const minX=Math.min(a.x,b.x),maxX=Math.max(a.x,b.x),minY=Math.min(a.y,b.y),maxY=Math.max(a.y,b.y);
+    if(maxX<v.l-pad||minX>v.r+pad||maxY<v.t-pad||minY>v.b+pad)continue;
+    const col=(NODE_STYLE[b.type]||NODE_STYLE.effect).color;
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo(mx-dy*.07,my+dx*.07,b.x,b.y);
+    ctx.strokeStyle=rgba(col,.24*alpha);ctx.lineWidth=(b.highlight?2.2:1.3)/Math.max(cam.zoom,.45);ctx.stroke();
+  }
+}
+function drawNodes(v){
+  const showLabel=cam.zoom>0.42;const pad=120;
+  for(const n of nodes){
+    if(n.alpha<0.03)continue;
+    if(n.x<v.l-pad||n.x>v.r+pad||n.y<v.t-pad||n.y>v.b+pad)continue;
+    const st=NODE_STYLE[n.type]||NODE_STYLE.effect;
+    if(n.type==='herb')drawHerb(n,st,n.alpha,showLabel);else drawAttr(n,st,n.alpha,showLabel);
+  }
+}
+function drawHerb(n,st,a,showLabel){
+  const r=st.r;
+  const g=ctx.createRadialGradient(n.x,n.y,r*.4,n.x,n.y,r*3.2);
+  g.addColorStop(0,rgba(st.color,.3*a));g.addColorStop(.5,rgba(st.color,.1*a));g.addColorStop(1,rgba(st.color,0));
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(n.x,n.y,r*3.2,0,TAU);ctx.fill();
+  if(n.selected){const pr=r+10+Math.sin(pulse*TAU)*5;ctx.beginPath();ctx.arc(n.x,n.y,pr,0,TAU);ctx.strokeStyle=rgba('#fff',.55*a);ctx.lineWidth=2/cam.zoom;ctx.stroke();}
+  if(n.highlight){const pr=r+16+Math.sin(pulse*TAU*2)*6;ctx.beginPath();ctx.arc(n.x,n.y,pr,0,TAU);ctx.strokeStyle=rgba('#f0b429',.7*a);ctx.lineWidth=2.5/cam.zoom;ctx.stroke();}
+  ctx.globalAlpha=a;
+  const body=ctx.createRadialGradient(n.x-r*.32,n.y-r*.38,r*.08,n.x,n.y,r);
+  body.addColorStop(0,'#ffe9ae');body.addColorStop(.55,'#f0b429');body.addColorStop(1,'#a06f10');
+  ctx.beginPath();ctx.arc(n.x,n.y,r,0,TAU);ctx.fillStyle=body;ctx.fill();
+  ctx.beginPath();ctx.arc(n.x,n.y,r*.86,0,TAU);ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1.4/cam.zoom;ctx.stroke();
+  ctx.beginPath();ctx.arc(n.x,n.y,r+4.5,0,TAU);ctx.strokeStyle=rgba('#f0b429',.32*a);ctx.lineWidth=2/cam.zoom;ctx.stroke();
+  ctx.fillStyle='#3a2408';ctx.font='800 '+Math.round(r*.78)+'px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.glyph,n.x,n.y+r*.04);
+  if(showLabel){ctx.font='700 15px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textBaseline='top';ctx.fillStyle=rgba('#f7ecd2',a);ctx.shadowColor='rgba(0,0,0,.85)';ctx.shadowBlur=8;ctx.fillText(n.label,n.x,n.y+r+10);ctx.shadowBlur=0;}
+  ctx.globalAlpha=1;
+}
+function drawAttr(n,st,a,showLabel){
+  const r=st.r;
+  if(n.selected||n.highlight){const pr=r+7+Math.sin(pulse*TAU)*3.5;ctx.beginPath();ctx.arc(n.x,n.y,pr,0,TAU);ctx.strokeStyle=rgba(st.color,.85*a);ctx.lineWidth=2/cam.zoom;ctx.stroke();}
+  const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*3.4);
+  g.addColorStop(0,rgba(st.color,.34*a));g.addColorStop(1,rgba(st.color,0));
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(n.x,n.y,r*3.4,0,TAU);ctx.fill();
+  ctx.globalAlpha=a;
+  ctx.beginPath();ctx.arc(n.x,n.y,r,0,TAU);
+  const body=ctx.createRadialGradient(n.x-r*.35,n.y-r*.4,r*.1,n.x,n.y,r);
+  body.addColorStop(0,rgba(st.color,1));body.addColorStop(1,rgba(st.color,.55));
+  ctx.fillStyle=body;ctx.fill();
+  ctx.beginPath();ctx.arc(n.x,n.y,r,0,TAU);ctx.strokeStyle=rgba('#fff',.3*a);ctx.lineWidth=1.3/cam.zoom;ctx.stroke();
+  if(showLabel&&cam.zoom>0.55){
+    ctx.font='500 12px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='top';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=7;
+    ctx.fillStyle=rgba('#c8d6e6',Math.min(1,a*.95));
+    const text=n.label.length>11?n.label.slice(0,11)+'…':n.label;
+    ctx.fillText(text,n.x,n.y+r+6);ctx.shadowBlur=0;
+  }
+  ctx.globalAlpha=1;
+}
+function tick(){
+  pulse=(pulse+0.012)%1;
+  for(const n of nodes){
+    let ta=1;
+    if(!typeVisible[n.type])ta=0;
+    else if(n.type!=='herb'&&!expanded.has(n.herbId))ta=0;
+    n.alpha+=(ta-n.alpha)*0.15;
+    if(n.alpha<0.002)n.alpha=0;
+    n.x+=(n.homeX-n.x)*0.16;n.y+=(n.homeY-n.y)*0.16;
+  }
+  render();requestAnimationFrame(tick);
+}
+
+/* ========== 6. 交互 ========== */
+let dragging=null,dragOff={x:0,y:0},panning=false,lastPt={x:0,y:0},moved=false,selectedNode=null;
+const pointers=new Map();let pinchStart=null;
+function toggleHerb(id){if(expanded.has(id))expanded.delete(id);else expanded.add(id);}
+function hitTest(wx,wy){
+  for(let i=nodes.length-1;i>=0;i--){
+    const n=nodes[i];if(n.alpha<0.18)continue;
+    const st=NODE_STYLE[n.type]||NODE_STYLE.effect;
+    const dx=wx-n.x,dy=wy-n.y,rr=st.r+7/cam.zoom;
+    if(dx*dx+dy*dy<=rr*rr)return n;
+  }return null;
+}
+cv.addEventListener('pointerdown',e=>{
+  try{cv.setPointerCapture(e.pointerId);}catch(err){}
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===2){const pts=[...pointers.values()];pinchStart={dist:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),zoom:cam.zoom};dragging=null;panning=false;return;}
+  const w=s2w(e.clientX,e.clientY),hit=hitTest(w.x,w.y);
+  moved=false;lastPt={x:e.clientX,y:e.clientY};
+  if(hit){dragging=hit;dragOff={x:w.x-hit.x,y:w.y-hit.y};const idx=nodes.indexOf(hit);if(idx>=0){nodes.splice(idx,1);nodes.push(hit);}}
+  else{panning=true;cv.classList.add('grabbing');}
+});
+cv.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId))return;
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===2&&pinchStart){
+    const pts=[...pointers.values()];
+    const d=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
+    const midX=(pts[0].x+pts[1].x)/2,midY=(pts[0].y+pts[1].y)/2;
+    const newZoom=clamp(pinchStart.zoom*(d/pinchStart.dist),0.1,4);
+    const wx=(midX-W/2)/cam.zoom+cam.x,wy=(midY-H/2)/cam.zoom+cam.y;
+    cam.zoom=newZoom;cam.x=wx-(midX-W/2)/cam.zoom;cam.y=wy-(midY-H/2)/cam.zoom;return;
+  }
+  const dx=e.clientX-lastPt.x,dy=e.clientY-lastPt.y;
+  if(Math.abs(dx)+Math.abs(dy)>2)moved=true;
+  lastPt={x:e.clientX,y:e.clientY};
+  if(dragging){
+    const w=s2w(e.clientX,e.clientY);
+    const nx=w.x-dragOff.x,ny=w.y-dragOff.y;
+    const ddx=nx-dragging.x,ddy=ny-dragging.y;
+    dragging.x=nx;dragging.y=ny;dragging.homeX=nx;dragging.homeY=ny;
+    if(dragging.type==='herb'){for(const n of nodes){if(n.parent===dragging.id){n.homeX+=ddx;n.homeY+=ddy;}}}
+  }else if(panning){cam.x-=dx/cam.zoom;cam.y-=dy/cam.zoom;}
+});
+function endPointer(e){
+  pointers.delete(e.pointerId);
+  if(pointers.size<2)pinchStart=null;
+  if(!moved){
+    const w=s2w(e.clientX,e.clientY),hit=hitTest(w.x,w.y);
+    if(hit){selectNode(hit);if(hit.type==='herb')toggleHerb(hit.herbId);}else selectNode(null);
+  }
+  dragging=null;panning=false;cv.classList.remove('grabbing');
+}
+cv.addEventListener('pointerup',endPointer);
+cv.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);if(pointers.size<2)pinchStart=null;dragging=null;panning=false;cv.classList.remove('grabbing');});
+cv.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const factor=Math.exp(-e.deltaY*0.0014);
+  const newZoom=clamp(cam.zoom*factor,0.1,4);
+  const wx=(e.clientX-W/2)/cam.zoom+cam.x,wy=(e.clientY-H/2)/cam.zoom+cam.y;
+  cam.zoom=newZoom;cam.x=wx-(e.clientX-W/2)/cam.zoom;cam.y=wy-(e.clientY-H/2)/cam.zoom;
+},{passive:false});
+
+/* ========== 7. 侧栏 UI ========== */
+const tabDetail=document.getElementById('tabDetail');
+const tabAI=document.getElementById('tabAI');
+const tabInfer=document.getElementById('tabInfer');
+const aiOut=document.getElementById('aiOut');
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+  if(tabDetail)tabDetail.classList.toggle('active',name==='detail');
+  if(tabInfer)tabInfer.classList.toggle('active',name==='infer');
+  if(tabAI)tabAI.classList.toggle('active',name==='ai');
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+function selectNode(n){
+  if(selectedNode)selectedNode.selected=false;
+  for(const x of nodes)x.highlight=false;
+  selectedNode=n;if(n)n.selected=true;
+  renderDetail(n);
+}
+function highlightRelated(node){
+  for(const x of nodes)x.highlight=false;
+  for(const x of nodes){if(x===node)continue;if(x.type===node.type&&x.label===node.label)x.highlight=true;}
+  toast('已高亮所有「'+node.label+'」节点');
+}
+function renderDetail(node){
+  if(!node){tabDetail.innerHTML='<div class="empty">点击画布中的任意节点<br>查看其属性与关联</div>';return;}
+  if(node.type==='herb'){
+    const h=node.data;
+    let html='<div class="d-head"><div class="d-icon">'+h.short+'</div><div><h2>'+h.name+'</h2><p>'+h.family+' · '+h.part+' · '+h.nature+'</p></div></div>';
+    html+='<div class="d-sec"><h4>性味归经</h4><p>'+h.nature+'<br>归 '+(h.meridians||[]).join('、')+' 经</p></div>';
+    html+='<div class="d-sec"><h4>功效主治</h4><div class="tags">'+(h.effects||[]).map(e=>'<span class="tag e">'+e+'</span>').join('')+'</div></div>';
+    html+='<div class="d-sec"><h4>主要化学成分</h4><div class="tags">'+(h.compounds||[]).map(c=>'<span class="tag c">'+c+'</span>').join('')+'</div></div>';
+    html+='<div class="d-sec"><h4>现代药理作用</h4><div class="tags">'+(h.pharma||[]).map(p=>'<span class="tag p">'+p+'</span>').join('')+'</div></div>';
+    if(h.dosage)html+='<div class="d-sec"><h4>用法用量</h4><p>'+h.dosage+'</p></div>';
+    html+='<div class="d-sec"><h4>数据来源</h4><p style="font-size:11.5px;color:#6b7a8d">'+(h.source||'《中国药典》2020年版一部 · 中药学教材 · 现代药理研究文献')+'</p></div>';
+    html+='<button class="btn-run" id="btnAnalyzeHerb">用 AI 对比分析这味药</button>';
+    tabDetail.innerHTML=html;
+    const btn=document.getElementById('btnAnalyzeHerb');
+    if(btn)btn.onclick=()=>{switchTab('ai');runAnalysis(h);};
+    return;
+  }
+  const st=NODE_STYLE[node.type]||NODE_STYLE.effect;
+  const parent=nodeIndex.get(node.parent);
+  const herb=parent?parent.data:null;
+  const related=[];
+  for(const x of nodes){
+    if(x.type===node.type&&x.label===node.label&&x.herbId!==node.herbId){
+      const p=nodeIndex.get(x.parent);
+      if(p&&!related.find(r=>r.name===p.label))related.push({name:p.label,id:p.id});
+    }
+  }
+  let html='<div class="attr-head"><span class="attr-badge" style="background:'+rgba(st.color,.16)+';color:'+st.color+';border:1px solid '+rgba(st.color,.35)+'">'+st.label+'</span><h3>'+node.label+'</h3></div>';
+  html+='<div class="d-sec"><h4>所属药物</h4><p>'+(herb?herb.name:'—')+'</p></div>';
+  if(related.length){
+    html+='<div class="d-sec"><h4>其他含此'+st.label+'的药物（'+related.length+'）</h4><div class="rel-list">'+related.map(r=>'<span class="rel-chip" data-hid="'+r.id+'">'+r.name+'</span>').join('')+'</div></div>';
+    html+='<button class="btn-run" id="btnHighlight" style="background:linear-gradient(135deg,#38bdf8,#0284c7);color:#031722">在画布中高亮全部</button>';
+  }else{html+='<div class="d-sec"><h4>关联</h4><p style="color:#6b7a8d;font-size:12px">暂无其他药物具有相同属性</p></div>';}
+  tabDetail.innerHTML=html;
+  const hl=document.getElementById('btnHighlight');
+  if(hl)hl.onclick=()=>highlightRelated(node);
+  tabDetail.querySelectorAll('.rel-chip').forEach(chip=>{
+    chip.onclick=()=>{const n=nodeIndex.get(chip.dataset.hid);if(n){focusNode(n);selectNode(n);}};
+  });
+}
+
+/* ========== 8. 视图控制 ========== */
+function fitView(){
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const n of nodes){
+    if(n.type!=='herb'&&!expanded.has(n.herbId))continue;
+    if(!typeVisible[n.type])continue;
+    minX=Math.min(minX,n.x-70);maxX=Math.max(maxX,n.x+70);minY=Math.min(minY,n.y-70);maxY=Math.max(maxY,n.y+70);
+  }
+  if(!isFinite(minX))return;
+  const w=Math.max(1,maxX-minX),h=Math.max(1,maxY-minY);
+  cam.zoom=clamp(Math.min((W-80)/w,(H-160)/h,1.6),0.1,4);
+  cam.x=(minX+maxX)/2;cam.y=(minY+maxY)/2;
+}
+function focusNode(n){cam.x=n.x;cam.y=n.y;if(cam.zoom<0.85)cam.zoom=0.9;}
+document.getElementById('btnFit').onclick=()=>fitView();
+document.getElementById('btnReset').onclick=()=>{cam.zoom=1;cam.x=0;cam.y=0;selectNode(null);fitView();};
+
+/* ========== 9. 图例 ========== */
+const legendEl=document.getElementById('legend');
+function buildLegend(){
+  if(!legendEl)return;
+  const counts={};TYPE_ORDER.forEach(t=>counts[t]=0);
+  nodes.forEach(n=>counts[n.type]=(counts[n.type]||0)+1);
+  let html='<h5>节点类型</h5>';
+  TYPE_ORDER.forEach(t=>{const st=NODE_STYLE[t];html+='<div class="legend-item" data-type="'+t+'"><span class="lg-dot" style="background:'+st.color+';color:'+st.color+'"></span><span>'+st.label+'</span><span class="lg-count">'+counts[t]+'</span></div>';});
+  legendEl.innerHTML=html;
+  legendEl.querySelectorAll('.legend-item').forEach(el=>{
+    el.onclick=()=>{const t=el.dataset.type;if(t==='herb')return;typeVisible[t]=!typeVisible[t];el.classList.toggle('off',!typeVisible[t]);};
+  });
+}
+
+/* ========== 10. 搜索 ========== */
+const searchInput=document.getElementById('searchInput'),searchResults=document.getElementById('searchResults');
+if(searchInput&&searchResults){
+  searchInput.addEventListener('input',()=>{
+    const q=searchInput.value.trim().toLowerCase();
+    if(!q){searchResults.classList.remove('show');return;}
+    const hits=HERBS.filter(h=>{const pool=[h.name,h.family,h.part,h.nature].concat(h.effects||[],h.compounds||[],h.pharma||[],h.meridians||[]);return pool.some(s=>String(s).toLowerCase().includes(q));});
+    searchResults.innerHTML=hits.length?hits.slice(0,12).map(h=>'<div class="sr-item" data-id="'+h.id+'"><span class="sr-dot" style="background:'+NODE_STYLE.herb.color+'"></span><span class="sr-name">'+h.name+'</span><span class="sr-meta">'+h.family+' · '+h.part+'</span></div>').join(''):'<div class="sr-item" style="color:#5d6b7d;cursor:default">未找到匹配药物</div>';
+    searchResults.classList.add('show');
+    searchResults.querySelectorAll('.sr-item[data-id]').forEach(el=>{
+      el.onclick=()=>{const id=el.dataset.id;if(!expanded.has(id))expanded.add(id);const n=nodeIndex.get('herb:'+id);if(n){focusNode(n);selectNode(n);}searchResults.classList.remove('show');searchInput.value='';};
+    });
+  });
+  searchInput.addEventListener('blur',()=>setTimeout(()=>searchResults.classList.remove('show'),180));
+}
+window.addEventListener('keydown',e=>{
+  const tag=e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;
+  if(e.key==='f'||e.key==='F')fitView();
+  else if(e.key==='Escape'){const im=document.getElementById('importModal');if(im&&im.classList.contains('show'))closeImportModal();else selectNode(null);}
+  else if(e.key==='='||e.key==='+')cam.zoom=clamp(cam.zoom*1.2,0.1,4);
+  else if(e.key==='-')cam.zoom=clamp(cam.zoom/1.2,0.1,4);
+});
+
+/* ========== 11. 规则推断引擎 ========== */
+const INF_DIMS=[
+  {key:'part',name:'药用部位',opts:['根','根茎','块茎','茎','叶','花','果实','种子','树皮','全草','菌核','矿物','藤茎','根皮']},
+  {key:'color',name:'主色（五色）',opts:['青绿','赤红','黄','白','黑紫','棕褐']},
+  {key:'taste',name:'味道',opts:['酸','苦','甘','辛','咸','涩','淡','无味']},
+  {key:'odor',name:'气味',opts:['芳香浓郁','气味清淡','腥','臭','焦香']},
+  {key:'texture',name:'质地',opts:['质轻','质重','多汁','油润','干燥','黏滑']},
+  {key:'family',name:'科属',opts:['唇形科','菊科','豆科','伞形科','毛茛科','姜科','芸香科','百合科','茄科','天南星科','蓼科','五加科','樟科','木兰科','蔷薇科','茜草科','三白草科','桔梗科','石竹科','莎草科','远志科','矿物类']},
+  {key:'env',name:'生长环境',opts:['向阳','阴湿','水生','旱生','高山']}
+];
+const INF_RULES={
+  color:{'青绿':{meridians:['肝'],effects:['清肝','疏肝','解毒'],temp:'凉',note:'青入肝，多能清肝疏肝'},'赤红':{meridians:['心'],effects:['活血','养血','清热'],temp:'平',note:'赤入心，多入血分'},'黄':{meridians:['脾'],effects:['健脾','补中','益气'],temp:'平',note:'黄入脾，多能健脾补中'},'白':{meridians:['肺'],effects:['宣肺','化痰','固表'],temp:'平',note:'白入肺，多能宣肺化痰'},'黑紫':{meridians:['肾'],effects:['补肾','滋阴','填精'],temp:'平',note:'黑入肾，多能补肾滋阴'},'棕褐':{meridians:['脾','肝'],effects:['燥湿','收敛'],temp:'温',note:'棕褐多主燥湿收敛'}},
+  taste:{'酸':{taste:['酸'],meridians:['肝'],effects:['收敛','固涩','生津'],temp:'平',note:'酸能收能涩'},'苦':{taste:['苦'],meridians:['心'],effects:['泄降','燥湿','清热'],temp:'寒',note:'苦能泄能燥'},'甘':{taste:['甘'],meridians:['脾'],effects:['补益','缓急','和中'],temp:'平',note:'甘能补能缓'},'辛':{taste:['辛'],meridians:['肺'],effects:['发散','行气','活血'],temp:'温',note:'辛能散能行'},'咸':{taste:['咸'],meridians:['肾'],effects:['软坚','散结','润下'],temp:'寒',note:'咸能软能下'},'涩':{taste:['涩'],meridians:['大肠'],effects:['收敛','止泻','固精'],temp:'温',note:'涩主收敛固脱'},'淡':{taste:['淡'],meridians:['膀胱'],effects:['渗湿','利水'],temp:'平',note:'淡能渗能利'},'无味':{effects:[],note:'味淡薄者药力平和'}},
+  part:{'根':{effects:['补益','清热','活血'],note:'根主下行'},'根茎':{effects:['行气','活血','燥湿'],note:'根茎横走'},'块茎':{effects:['化痰','散结','燥湿'],note:'块茎多富淀粉'},'茎':{effects:['通利','祛风'],note:'茎主通利'},'藤茎':{effects:['通络','祛风','安神'],note:'藤茎善走窜'},'叶':{effects:['解表','清热','解毒'],note:'叶质轻升浮'},'花':{effects:['解表','理气','清热'],note:'花轻扬升浮'},'果实':{effects:['理气','消食','收敛'],note:'果实多沉降'},'种子':{effects:['润下','补肾','安神'],note:'种子多润多补'},'树皮':{effects:['清热燥湿','利水'],note:'皮类多苦寒燥湿'},'根皮':{effects:['清热凉血','活血'],note:'根皮多清热凉血'},'全草':{effects:['清热解毒','利湿'],note:'全草多清热利湿'},'菌核':{effects:['利水','健脾','宁心'],note:'菌核多甘淡渗利'},'矿物':{effects:['清热','镇降','安神'],temp:'寒',note:'矿物多质重性寒'}},
+  odor:{'芳香浓郁':{effects:['行气','化湿','开窍','醒脾'],compounds:['挥发油'],note:'芳香之品多含挥发油'},'气味清淡':{effects:[],note:'气味清淡者药力多平和'},'腥':{effects:['软坚','入血分','化痰'],note:'腥味多入血分'},'臭':{effects:['解毒','杀虫','攻毒'],warn:'臭秽之品多有小毒',note:'恶臭多主解毒杀虫'},'焦香':{effects:['健脾','消食'],note:'焦香入脾'}},
+  texture:{'质轻':{effects:['解表','升散'],note:'质轻升浮'},'质重':{effects:['镇降','安神','潜阳'],note:'质重沉降'},'多汁':{effects:['生津','清热'],temp:'寒',note:'多汁多能生津清热'},'油润':{effects:['润肠','润肺'],note:'油润多能润肠润肺'},'干燥':{effects:['燥湿'],note:'干燥之品多能燥湿'},'黏滑':{effects:['滑肠','利窍'],note:'黏滑多能滑肠利窍'}},
+  family:{
+    '唇形科':{taste:['辛'],temp:'温',meridians:['肺','脾'],effects:['解表','行气','化湿','清热'],compounds:['挥发油','黄酮类','萜类'],note:'唇形科富挥发油'},
+    '菊科':{taste:['苦','辛'],temp:'寒',meridians:['肺','肝'],effects:['清热解毒','疏风','明目'],compounds:['倍半萜内酯','黄酮','菊糖'],note:'菊科多含倍半萜内酯'},
+    '豆科':{taste:['甘'],temp:'平',meridians:['脾','肺'],effects:['补益','利尿','解毒'],compounds:['黄酮','皂苷','多糖'],note:'豆科多含黄酮皂苷'},
+    '伞形科':{taste:['辛'],temp:'温',meridians:['肝','肺'],effects:['解表','活血','祛风'],compounds:['挥发油','香豆素'],note:'伞形科多含香豆素'},
+    '毛茛科':{taste:['苦'],temp:'寒',meridians:['心','肝'],effects:['清热燥湿','解毒'],compounds:['生物碱','苷类'],warn:'毛茛科多含生物碱，部分有毒',note:'毛茛科多苦寒'},
+    '姜科':{taste:['辛'],temp:'温',meridians:['脾','胃'],effects:['温中','行气','散寒'],compounds:['挥发油','姜辣素'],note:'姜科富挥发油'},
+    '芸香科':{taste:['辛','苦'],temp:'温',meridians:['脾','肺'],effects:['理气','燥湿','化痰'],compounds:['挥发油','生物碱','黄酮'],note:'芸香科多含挥发油'},
+    '百合科':{taste:['甘'],temp:'寒',meridians:['肺','心'],effects:['滋阴','润肺','清热'],compounds:['甾体皂苷','多糖'],note:'百合科多含甾体皂苷'},
+    '茄科':{taste:['苦'],temp:'寒',meridians:['肺','肝'],effects:['清热','解毒','镇咳'],compounds:['生物碱'],warn:'茄科多含生物碱',note:'茄科多苦寒'},
+    '天南星科':{taste:['辛'],temp:'温',meridians:['脾','肺'],effects:['化痰','散结','燥湿'],compounds:['生物碱','苷类'],warn:'天南星科多有毒，需炮制',note:'天南星科辛温化痰'},
+    '蓼科':{taste:['苦','酸'],temp:'寒',meridians:['肝','大肠'],effects:['清热','凉血','收敛'],compounds:['蒽醌','鞣质'],note:'蓼科多含蒽醌与鞣质'},
+    '五加科':{taste:['甘','微苦'],temp:'温',meridians:['脾','肺','心'],effects:['补气','养血','安神'],compounds:['皂苷','多糖'],note:'五加科多含皂苷多糖'},
+    '樟科':{taste:['辛','甘'],temp:'温',meridians:['心','肺','膀胱'],effects:['发汗','温通','化气'],compounds:['挥发油','桂皮醛'],note:'樟科富挥发油'},
+    '木兰科':{taste:['酸','甘'],temp:'温',meridians:['肺','心','肾'],effects:['收敛','益气','宁心'],compounds:['木脂素','挥发油'],note:'木兰科多含木脂素'},
+    '蔷薇科':{taste:['酸','甘'],temp:'微温',meridians:['脾','胃','肝'],effects:['消食','行气','散瘀'],compounds:['有机酸','黄酮','三萜'],note:'蔷薇科多含有机酸'},
+    '茜草科':{taste:['苦','甘'],temp:'寒',meridians:['心','肝'],effects:['清热','凉血','利湿'],compounds:['环烯醚萜苷','蒽醌','有机酸'],note:'茜草科多含环烯醚萜苷'},
+    '三白草科':{taste:['辛'],temp:'微寒',meridians:['肺'],effects:['清热解毒','消痈排脓'],compounds:['挥发油','黄酮'],note:'三白草科多辛寒'},
+    '桔梗科':{taste:['甘','苦'],temp:'平',meridians:['脾','肺'],effects:['益气','宣肺','祛痰'],compounds:['皂苷','多糖','菊糖'],note:'桔梗科多含皂苷菊糖'},
+    '石竹科':{taste:['甘','微苦'],temp:'平',meridians:['脾','肺'],effects:['益气','生津'],compounds:['皂苷','多糖','氨基酸'],note:'石竹科多甘平'},
+    '莎草科':{taste:['辛','微苦'],temp:'平',meridians:['肝','脾'],effects:['疏肝','理气','调经'],compounds:['挥发油','生物碱'],note:'莎草科多辛平'},
+    '远志科':{taste:['苦','辛'],temp:'温',meridians:['心','肾'],effects:['安神','益智','祛痰'],compounds:['皂苷','寡糖酯'],note:'远志科多含皂苷寡糖酯'},
+    '矿物类':{taste:['甘','辛'],temp:'寒',meridians:['肺','胃'],effects:['清热','镇降','除烦'],compounds:['无机盐','微量元素'],note:'矿物药多甘寒质重'}
+  },
+  env:{'向阳':{temp:'温',effects:['温补','升散'],note:'向阳而生者多禀阳气'},'阴湿':{temp:'寒',effects:['清热','利湿','滋阴'],note:'阴湿环境者多禀阴气'},'水生':{temp:'寒',effects:['清热','利水','凉血'],note:'水生植物多性寒'},'旱生':{temp:'温',effects:['温中','散寒','固涩'],note:'旱生植物多耐燥'},'高山':{temp:'温',effects:['温阳','祛寒'],note:'高山植物多抗寒'}}
+};
+const TEMP_SCORE={'寒':-2,'凉':-1,'微寒':-1,'平':0,'微温':0.5,'温':1,'热':2};
+function sortTop(obj,n){return Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0]);}
+function infer(features){
+  const acc={temp:{},tastes:{},meridians:{},effects:{},compounds:{},warns:[],chains:[]};
+  for(const dim in features){
+    for(const v of features[dim]){
+      const rule=INF_RULES[dim]&&INF_RULES[dim][v];if(!rule)continue;
+      if(rule.temp)acc.temp[rule.temp]=(acc.temp[rule.temp]||0)+1;
+      (rule.taste||[]).forEach(t=>acc.tastes[t]=(acc.tastes[t]||0)+1);
+      (rule.meridians||[]).forEach(m=>acc.meridians[m]=(acc.meridians[m]||0)+1);
+      (rule.effects||[]).forEach(e=>acc.effects[e]=(acc.effects[e]||0)+1);
+      (rule.compounds||[]).forEach(c=>acc.compounds[c]=(acc.compounds[c]||0)+1);
+      if(rule.warn)acc.warns.push({feature:v,warn:rule.warn});
+      const dimName=(INF_DIMS.find(d=>d.key===dim)||{}).name||dim;
+      acc.chains.push({dim:dimName,feature:v,note:rule.note||v+' → 参与药性推断'});
+    }
+  }
+  let tempFinal='平';
+  const tempEntries=Object.entries(acc.temp);
+  if(tempEntries.length){
+    let sum=0,cnt=0;
+    tempEntries.forEach(([k,c])=>{sum+=(TEMP_SCORE[k]||0)*c;cnt+=c;});
+    const avg=sum/cnt;
+    if(avg<=-1.4)tempFinal='寒';else if(avg<=-0.5)tempFinal='凉';else if(avg<0.5)tempFinal='平';else if(avg<1.4)tempFinal='温';else tempFinal='热';
+  }
+  const tastes=sortTop(acc.tastes,3),meridians=sortTop(acc.meridians,3),effects=sortTop(acc.effects,4),compounds=sortTop(acc.compounds,3);
+  const conflicts=[];
+  if(acc.temp['寒']&&(acc.temp['温']||acc.temp['热']))conflicts.push('同时存在寒性与温性证据，该植物可能具有寒热错杂的双向调节特点。');
+  return{temp:tempFinal,tastes,meridians,effects,compounds,warns:acc.warns,chains:acc.chains,conflicts};
+}
+const TASTE_CHARS=['酸','苦','甘','辛','咸','涩','淡'];
+function findSimilarHerbs(result,features){
+  return HERBS.map(h=>{
+    let score=0,total=0;
+    total+=3;const hTasteHit=TASTE_CHARS.filter(t=>h.nature.includes(t)&&result.tastes.includes(t)).length;score+=Math.min(hTasteHit,2)*1.5;
+    total+=2;
+    if(result.temp!=='平'){if(h.nature.includes(result.temp))score+=2;else if((result.temp==='寒'||result.temp==='凉')&&(h.nature.includes('寒')||h.nature.includes('凉')))score+=1.5;else if((result.temp==='温'||result.temp==='热')&&(h.nature.includes('温')||h.nature.includes('热')))score+=1.5;}
+    else{if(h.nature.includes('平'))score+=1.5;}
+    total+=3;const merHit=result.meridians.filter(m=>h.meridians.includes(m)).length;score+=Math.min(merHit,3)*1;
+    total+=4;let effHit=0;
+    for(const e of result.effects){const key=e.slice(0,2);if(h.effects.some(he=>he.includes(key)||e.includes(he.slice(0,2))))effHit++;}
+    score+=Math.min(effHit,3)*1.3;
+    total+=2;const famSel=features.family||[];if(famSel.length&&famSel.includes(h.family))score+=2;
+    total+=1;const partSel=features.part||[];if(partSel.length&&partSel.some(p=>h.part.includes(p)))score+=1;
+    return{herb:h,score:score/total};
+  }).sort((a,b)=>b.score-a.score).slice(0,5);
+}
+const infForm=document.getElementById('infForm'),infResult=document.getElementById('infResult');
+const INF_SEL={};
+function buildInferForm(){
+  if(!infForm)return;
+  let html='';
+  INF_DIMS.forEach(d=>{
+    html+='<div class="inf-group"><label>'+d.name+'</label><div class="chips" data-dim="'+d.key+'">';
+    d.opts.forEach(o=>{
+      const risk=(d.key==='family'&&['毛茛科','茄科','天南星科'].indexOf(o)>=0)?'<span class="risk">⚠</span>':'';
+      html+='<button class="chip" data-val="'+o+'">'+o+risk+'</button>';
+    });
+    html+='</div></div>';
+  });
+  infForm.innerHTML=html;
+  INF_DIMS.forEach(d=>INF_SEL[d.key]=new Set());
+  infForm.querySelectorAll('.chips').forEach(box=>{
+    const dim=box.dataset.dim;
+    box.querySelectorAll('.chip').forEach(chip=>{
+      chip.onclick=()=>{
+        const v=chip.dataset.val;
+        if(INF_SEL[dim].has(v)){INF_SEL[dim].delete(v);chip.classList.remove('on');}
+        else{INF_SEL[dim].add(v);chip.classList.add('on');}
+      };
+    });
+  });
+}
+function collectFeatures(){
+  const features={};let total=0;
+  INF_DIMS.forEach(d=>{if(INF_SEL[d.key].size){features[d.key]=[...INF_SEL[d.key]];total+=INF_SEL[d.key].size;}});
+  return{features,total};
+}
+document.getElementById('btnClearInf').onclick=()=>{
+  INF_DIMS.forEach(d=>INF_SEL[d.key].clear());
+  if(infForm)infForm.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  if(infResult){infResult.classList.remove('show');infResult.innerHTML='';}
+};
+document.getElementById('btnInfer').onclick=()=>{
+  const{features,total}=collectFeatures();
+  if(!total){toast('请至少选择一项植物特征');return;}
+  const result=infer(features);
+  const similar=findSimilarHerbs(result,features);
+  renderRuleInference(result,similar);
+  if(infResult)infResult.classList.add('show');
+};
+function renderRuleInference(result,similar){
+  if(!infResult)return;
+  const CHAIN_COLORS={'主色（五色）':'rgba(192,132,252,.16)','味道':'rgba(248,113,113,.16)','药用部位':'rgba(132,204,22,.16)','气味':'rgba(56,189,248,.16)','质地':'rgba(251,191,36,.16)','科属':'rgba(45,212,191,.16)','生长环境':'rgba(244,114,182,.16)'};
+  const tasteStr=result.tastes.length?result.tastes.join('、')+'，'+result.temp:'药性平和（特征不足）';
+  const merStr=result.meridians.length?'归 '+result.meridians.join('、')+' 经':'归经倾向不明显';
+  const effStr=result.effects.length?result.effects.join('、'):'尚不明确';
+  const compStr=result.compounds.length?result.compounds.join('、'):'尚不明确';
+  let html='';
+  if(result.conflicts.length)html+='<div class="conflict">⚠ '+result.conflicts.join('<br>⚠ ')+'</div>';
+  html+='<div class="res-card"><h4>规则引擎推断</h4>';
+  html+='<div class="res-row"><span class="res-key">性味</span><span class="res-val"><span class="hl">'+tasteStr+'</span></span></div>';
+  html+='<div class="res-row"><span class="res-key">归经</span><span class="res-val">'+merStr+'</span></div>';
+  html+='<div class="res-row"><span class="res-key">功效倾向</span><span class="res-val"><span class="hl">'+effStr+'</span></span></div>';
+  html+='<div class="res-row"><span class="res-key">成分倾向</span><span class="res-val">'+compStr+'</span></div>';
+  if(result.warns.length)html+='<div class="res-row"><span class="res-key">毒性预警</span><span class="res-val"><span class="warn">'+result.warns.map(w=>w.warn).join('；')+'</span></span></div>';
+  html+='</div>';
+  if(result.chains.length){
+    html+='<div class="res-card"><h4>推理依据（'+result.chains.length+'条）</h4>';
+    result.chains.forEach(c=>{const bg=CHAIN_COLORS[c.dim]||'rgba(255,255,255,.06)';html+='<div class="chain-item"><span class="chain-badge" style="background:'+bg+';color:#c9d5e4">'+c.dim+'</span><span class="chain-txt"><b>'+c.feature+'</b> → '+c.note+'</span></div>';});
+    html+='</div>';
+  }
+  if(similar.length){
+    html+='<div class="res-card"><h4>最相似的已知中药</h4>';
+    similar.forEach(s=>{const pct=Math.round(s.score*100);html+='<div class="sim-herb" data-hid="'+s.herb.id+'"><span class="lg-dot" style="background:'+NODE_STYLE.herb.color+';color:'+NODE_STYLE.herb.color+';width:8px;height:8px"></span><span style="font-size:12.5px;font-weight:600">'+s.herb.name+'</span><span style="font-size:10.5px;color:#5d6b7d">'+s.herb.family+' · '+s.herb.part+'</span><span class="sim-bar"><i style="width:'+pct+'%"></i></span><span class="sim-score">'+pct+'%</span></div>';});
+    html+='</div>';
+  }
+  html+='<div class="hint" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">基于 '+HERBS.length+' 味已入库中药的共性规律，属于<strong style="color:#c4b5fd">循证启发式推断</strong>，不构成用药建议。</div>';
+  infResult.innerHTML=html;
+  infResult.querySelectorAll('.sim-herb').forEach(el=>{el.onclick=()=>{const n=nodeIndex.get('herb:'+el.dataset.hid);if(n){focusNode(n);selectNode(n);switchTab('detail');}};});
+}
+
+/* ========== 12. 图片上传 ========== */
+const iuDrop=document.getElementById('iuDrop');
+const imgFileInput=document.getElementById('imgFile');
+const iuPreview=document.getElementById('iuPreview');
+const iuImg=document.getElementById('iuImg');
+const iuName=document.getElementById('iuName');
+const iuSize=document.getElementById('iuSize');
+const iuRemove=document.getElementById('iuRemove');
+
+function formatBytes(bytes){
+  if(bytes<1024)return bytes+' B';
+  if(bytes<1024*1024)return (bytes/1024).toFixed(1)+' KB';
+  return (bytes/1024/1024).toFixed(2)+' MB';
+}
+function compressImage(file,maxSize,quality){
+  return new Promise((resolve,reject)=>{
+    if(!file.type.startsWith('image/')){reject(new Error('请上传图片文件'));return;}
+    if(file.size>12*1024*1024){reject(new Error('图片过大，请上传小于 12MB 的文件'));return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        const max=maxSize||1280;
+        if(w>max||h>max){
+          if(w>h){h=Math.round(h*max/w);w=max;}
+          else{w=Math.round(w*max/h);h=max;}
+        }
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        const c2d=canvas.getContext('2d');
+        c2d.fillStyle='#ffffff';
+        c2d.fillRect(0,0,w,h);
+        c2d.drawImage(img,0,0,w,h);
+        const dataUrl=canvas.toDataURL('image/jpeg',quality||0.85);
+        resolve({dataUrl:dataUrl,width:w,height:h,originalName:file.name,originalSize:file.size});
+      };
+      img.onerror=()=>reject(new Error('图片解析失败'));
+      img.src=e.target.result;
+    };
+    reader.onerror=()=>reject(new Error('文件读取失败'));
+    reader.readAsDataURL(file);
+  });
+}
+async function handleImageFile(file){
+  if(!file)return;
+  if(iuDrop){iuDrop.innerHTML='<div class="iu-loading"><div class="spin"></div>图片处理中…</div>';}
+  try{
+    const res=await compressImage(file,1280,0.85);
+    imageState.dataUrl=res.dataUrl;
+    imageState.name=res.originalName;
+    imageState.size=res.originalSize;
+    imageState.width=res.width;
+    imageState.height=res.height;
+    updateImagePreview();
+    toast('已添加图片：'+res.originalName);
+  }catch(err){
+    toast('图片处理失败：'+(err.message||err));
+    resetImageUI();
+  }
+}
+function updateImagePreview(){
+  if(!iuDrop||!iuPreview)return;
+  if(imageState.dataUrl){
+    iuDrop.style.display='none';
+    iuPreview.style.display='flex';
+    if(iuImg)iuImg.src=imageState.dataUrl;
+    if(iuName)iuName.textContent=imageState.name||'植物照片';
+    if(iuSize)iuSize.textContent=formatBytes(imageState.size)+' · '+imageState.width+'×'+imageState.height;
+  }else{
+    iuDrop.style.display='block';
+    iuPreview.style.display='none';
+    iuDrop.innerHTML='<span class="iu-icon">🖼</span><span class="iu-text">点击、拖拽或粘贴图片</span><span class="iu-hint">AI 将结合图像特征参与药性推断 · 支持 JPG/PNG，建议 &lt;5MB</span>';
+  }
+}
+function resetImageUI(){
+  imageState.dataUrl='';imageState.name='';imageState.size=0;imageState.width=0;imageState.height=0;
+  if(imgFileInput)imgFileInput.value='';
+  updateImagePreview();
+}
+if(iuDrop){
+  iuDrop.onclick=()=>{if(imgFileInput)imgFileInput.click();};
+  iuDrop.addEventListener('dragover',e=>{e.preventDefault();iuDrop.classList.add('drag');});
+  iuDrop.addEventListener('dragleave',()=>iuDrop.classList.remove('drag'));
+  iuDrop.addEventListener('drop',e=>{
+    e.preventDefault();iuDrop.classList.remove('drag');
+    const f=e.dataTransfer.files&&e.dataTransfer.files[0];
+    if(f)handleImageFile(f);
+  });
+}
+if(imgFileInput){
+  imgFileInput.onchange=()=>{
+    const f=imgFileInput.files&&imgFileInput.files[0];
+    if(f)handleImageFile(f);
+  };
+}
+if(iuRemove)iuRemove.onclick=()=>{resetImageUI();toast('已移除图片');};
+/* 全局粘贴：仅在推断面板激活时生效 */
+window.addEventListener('paste',e=>{
+  if(!tabInfer||!tabInfer.classList.contains('active'))return;
+  const items=e.clipboardData&&e.clipboardData.items;
+  if(!items)return;
+  for(let i=0;i<items.length;i++){
+    if(items[i].type.indexOf('image')>=0){
+      const file=items[i].getAsFile();
+      if(file){e.preventDefault();handleImageFile(file);return;}
+    }
+  }
+});
+
+/* ========== 13. AI 集成 ========== */
+let currentModel='glm';
+const apiKeyInput=document.getElementById('apiKey'),proxyInput=document.getElementById('proxyUrl');
+function keyName(){return'herb_atlas_key_'+currentModel;}
+function proxyName(){return'herb_atlas_proxy_'+currentModel;}
+function loadKey(){if(apiKeyInput)apiKeyInput.value=localStorage.getItem(keyName())||'';if(proxyInput)proxyInput.value=localStorage.getItem(proxyName())||'';}
+if(apiKeyInput)apiKeyInput.addEventListener('change',()=>localStorage.setItem(keyName(),apiKeyInput.value.trim()));
+if(proxyInput)proxyInput.addEventListener('change',()=>localStorage.setItem(proxyName(),proxyInput.value.trim()));
+loadKey();
+document.querySelectorAll('.ms').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.ms').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    currentModel=btn.dataset.model;
+    loadKey();
+  };
+});
+const SYS_COMPARE='你是一位精通《中国药典》2020年版、中药学、天然药物化学与现代药理学的资深专家。回答要求：严格区分【药典明确记载】、【通行教材/共识】、【你的推测】三类信息，推测必须明确标注。';
+const SYS_INFER='你是一位精通《中国药典》、中药学、天然药物化学与植物分类学的资深专家。你的专长是依据中医"取象比类"思维与现代植物化学规律（科属与次生代谢产物的相关性），对仅有形态特征或照片的未知植物进行药性推断。回答要求：严格区分【有明确规律支撑】与【纯属推测】的内容；逻辑链条要具体；语言专业简洁；必须明确声明不构成用药建议。';
+const SYS_VISION='你是一位精通《中国药典》、中药学、天然药物化学、植物分类学与药用植物形态学的资深专家。你的专长是根据植物照片结合文字特征，运用中医"取象比类"思维与现代植物化学规律，对未知植物进行药性推断。回答要求：先客观描述你在图片中观察到的形态特征（叶形叶序、花色花型、果实、根茎、整体习性等），再基于这些观察进行药性推断；严格区分【有明确规律支撑】与【纯属推测】的内容；必须明确声明不构成用药建议。';
+const SYS_PARSE='你是一位精通《中国药典》2020/2025年版、中药学与天然药物化学的资深专家。你的任务是把用户粘贴的药典正文解析为结构化JSON数据。你必须严格按指定的JSON格式输出，不得输出任何其他解释文字。';
+
+function buildComparePrompt(h){
+  return'请对中药「'+h.name+'」进行多维度属性分析，并与《中国药典》2020年版一部逐项对比。\n\n【已知记载】\n- 科属：'+h.family+'\n- 药用部位：'+h.part+'\n- 性味：'+h.nature+'\n- 归经：'+(h.meridians||[]).join('、')+'经\n- 功效：'+(h.effects||[]).join('、')+'\n- 主要化学成分：'+(h.compounds||[]).join('、')+'\n- 现代药理作用：'+(h.pharma||[]).join('、')+'\n\n请严格按以下结构输出：\n\n## 一、一致性核对\n## 二、成分 → 靶点 → 药理效应 链条\n## 三、药用部位 → 成分 → 药效 的关联总结\n## 四、临床使用建议\n## 五、风险提示';
+}
+function buildInferPrompt(features,hasImage){
+  const LABELS={part:'药用部位',color:'主色（五色）',taste:'味道',odor:'气味',texture:'质地',family:'科属',env:'生长环境'};
+  let featStr='';
+  for(const dim in features){if(features[dim]&&features[dim].length)featStr+='- '+(LABELS[dim]||dim)+'：'+features[dim].join('、')+'\n';}
+  if(!featStr)featStr='（未提供文字特征）\n';
+  const imgNote=hasImage?'\n【附加资料】用户上传了一张植物照片，请先仔细观察图像，客观描述你看到的形态特征（叶形叶序、花色花型、果实、根茎、整体生长习性等），再结合这些观察与上方文字特征共同推断。\n':'';
+  return'现在需要你对一株未知植物进行"药性推断"。这株植物没有药典记载，仅有以下资料：\n\n【形态与生长特征】\n'+featStr+imgNote+'\n请运用中医"取象比类"思维与现代植物化学规律（如科属与次生代谢产物的相关性），推断该植物可能的药性，严格按以下结构输出：\n\n## 一、图像观察（若提供图片）\n客观描述观察到的植物形态特征。若未提供图片，此节写"未提供图片"。\n\n## 二、性味推断\n推断其四气（寒热温凉平）与五味，说明每项判断的依据。\n\n## 三、归经推断\n推断其可能归属的脏腑经络，说明依据。\n\n## 四、功效推断\n用中医术语推断其可能的中药功效，说明依据。\n\n## 五、化学成分倾向\n基于科属与形态特征，推测其可能含有的主要化学成分类别。\n\n## 六、现代药理倾向\n推测其可能的现代药理作用。\n\n## 七、安全提示\n提示使用风险、可能的毒性、禁忌人群与注意事项。\n\n## 八、置信度评估\n逐项说明哪些推断有明确规律支撑、哪些属于推测，并给出整体置信度（高/中/低）。\n\n最后请用一句话总结：如果要在已知中药中寻找参照，最接近的是哪一味或哪几味，为什么。';
+}
+function buildParsePrompt(text){
+  return'请把下面的药典正文解析为结构化 JSON。文本可能包含一味或多味中药，可能来自网页复制、格式不规范。\n\n'+
+    '【解析要求】\n'+
+    '1. 若文本含多味药（以药名标题分隔），请分别解析，输出到 herbs 数组。\n'+
+    '2. 字段说明：\n'+
+    '   - name：药物中文名（不含别名括号，必须尽力识别）\n'+
+    '   - short：用于节点显示的单个汉字（取药名首字）\n'+
+    '   - family：科属，如"罂粟科"；矿物药填"矿物类"，动物药填对应科\n'+
+    '   - part：药用部位，如"块茎"（去掉"干燥"前缀）\n'+
+    '   - nature：性味，如"辛、苦，温"（去掉"归…经"部分）\n'+
+    '   - meridians：归经数组，如["肝","脾"]（去掉"经"字）\n'+
+    '   - effects：功效数组，如["活血","行气","止痛"]\n'+
+    '   - indications：主治症状数组\n'+
+    '   - compounds：主要化学成分数组。优先从〖含量测定〗提取；若缺失可依据通行研究补全 3-5 个，加"(推测)"标记\n'+
+    '   - pharma：现代药理作用数组。若缺失可依据功效与成分推断补全，加"(推测)"标记\n'+
+    '   - dosage：用法用量\n'+
+    '   - warnings：安全警示数组\n'+
+    '   - source：数据来源说明\n'+
+    '3. 不要编造药典中不存在的性味、归经、功效；仅成分与药理允许推测且必须标注。\n\n'+
+    '【输出格式】\n必须且只能输出如下 JSON，不要任何解释、不要 markdown 代码块标记：\n'+
+    '{"herbs":[{"name":"","short":"","family":"","part":"","nature":"","meridians":[],"effects":[],"indications":[],"compounds":[],"pharma":[],"dosage":"","warnings":[],"source":""}]}\n\n'+
+    '【药典正文】\n'+text;
+}
+async function callGLM(apiKey,prompt,proxy,sys,maxTokens){
+  const base=proxy?proxy.replace(/\/$/,'')+'/chat/completions':'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+  const res=await fetch(base,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify({model:'glm-4-flash',messages:[{role:'system',content:sys},{role:'user',content:prompt}],temperature:0.3,max_tokens:maxTokens||2800,stream:false})});
+  if(!res.ok){const t=await res.text().catch(()=>'');throw new Error('智谱清言 API 返回 '+res.status+'\n'+t.slice(0,300));}
+  const data=await res.json();
+  return(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'（模型返回为空）';
+}
+async function callDeepSeek(apiKey,prompt,proxy,sys,maxTokens){
+  const base=proxy?proxy.replace(/\/$/,'')+'/chat/completions':'https://api.deepseek.com/chat/completions';
+  const res=await fetch(base,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:sys},{role:'user',content:prompt}],temperature:0.3,max_tokens:maxTokens||2800,stream:false})});
+  if(!res.ok){const t=await res.text().catch(()=>'');throw new Error('DeepSeek API 返回 '+res.status+'\n'+t.slice(0,300));}
+  const data=await res.json();
+  return(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'（模型返回为空）';
+}
+/* 智谱 GLM-4V 视觉模型多模态调用 */
+async function callGLMVision(apiKey,prompt,imageDataUrl,proxy){
+  const base=proxy?proxy.replace(/\/$/,'')+'/chat/completions':'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+  const messages=[
+    {role:'system',content:SYS_VISION},
+    {role:'user',content:[
+      {type:'image_url',image_url:{url:imageDataUrl}},
+      {type:'text',text:prompt}
+    ]}
+  ];
+  const res=await fetch(base,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body:JSON.stringify({model:'glm-4v-flash',messages:messages,temperature:0.35,max_tokens:3200,stream:false})
+  });
+  if(!res.ok){const t=await res.text().catch(()=>'');throw new Error('智谱清言视觉模型返回 '+res.status+'\n'+t.slice(0,300));}
+  const data=await res.json();
+  return(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'（模型返回为空）';
+}
+async function callAI(prompt,sys,maxTokens){
+  const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
+  if(!apiKey)throw new Error('NO_KEY');
+  const proxy=proxyInput?proxyInput.value.trim():'';
+  return currentModel==='glm'?await callGLM(apiKey,prompt,proxy,sys,maxTokens):await callDeepSeek(apiKey,prompt,proxy,sys,maxTokens);
+}
+function modelLabel(){return currentModel==='glm'?'智谱清言':'DeepSeek';}
+async function runAnalysis(herb){
+  const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
+  if(!apiKey){aiOut.innerHTML='<div class="err">请先在上方填入 API Key。<br><br>· 智谱清言：open.bigmodel.cn 控制台获取<br>· DeepSeek：platform.deepseek.com 控制台获取</div>';return;}
+  const name=modelLabel();
+  aiOut.innerHTML='<div class="loading"><div class="spin"></div>'+name+' 正在分析「'+herb.name+'」…</div>';
+  try{
+    const text=await callAI(buildComparePrompt(herb),SYS_COMPARE,2800);
+    aiOut.innerHTML='<div style="font-size:11px;color:#5d6b7d;margin-bottom:10px">'+name+' · '+herb.name+' · '+new Date().toLocaleTimeString('zh-CN')+'</div>'+mdToHtml(text);
+  }catch(err){aiOut.innerHTML=renderAIError(err);}
+}
+document.getElementById('runAI').onclick=()=>{
+  const herb=(selectedNode&&selectedNode.type==='herb')?selectedNode.data:(selectedNode&&nodeIndex.get(selectedNode.parent)?nodeIndex.get(selectedNode.parent).data:null);
+  if(!herb){toast('请先在画布中选中一味药物');return;}
+  runAnalysis(herb);
+};
+
+/* AI 药性推断（支持图片） */
+document.getElementById('btnAIInfer').onclick=async()=>{
+  const{features,total}=collectFeatures();
+  const hasImage=!!imageState.dataUrl;
+  if(!total&&!hasImage){toast('请至少选择一项特征或上传一张植物照片');return;}
+  const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
+  if(!apiKey){
+    if(infResult){infResult.classList.add('show');infResult.innerHTML='<div class="err">使用 AI 智能推断前，请先在「AI 对比」面板中填入 API Key。<br><br>· 智谱清言：open.bigmodel.cn 控制台获取<br>· DeepSeek：platform.deepseek.com 控制台获取</div>';}
+    return;
+  }
+  const name=modelLabel();
+  const prompt=buildInferPrompt(features,hasImage);
+  const loadingMsg=hasImage
+    ? name+(currentModel==='glm'?' 视觉模型':'' )+' 正在结合图片与 '+total+' 项特征推断…'
+    : name+' 正在基于 '+total+' 项特征推断…';
+  if(infResult){infResult.classList.add('show');infResult.innerHTML='<div class="loading"><div class="spin"></div>'+loadingMsg+'</div>';}
+
+  try{
+    let text='';
+    let usedModel=name;
+    if(hasImage){
+      if(currentModel==='glm'){
+        const proxy=proxyInput?proxyInput.value.trim():'';
+        text=await callGLMVision(apiKey,prompt,imageState.dataUrl,proxy);
+        usedModel='智谱清言（GLM-4V 视觉）';
+      } else {
+        // DeepSeek 不支持图片，降级为纯文本
+        toast('DeepSeek 暂不支持图片识别，本次仅用文字特征推断');
+        text=await callDeepSeek(apiKey,prompt,proxyInput?proxyInput.value.trim():'',SYS_INFER,2800);
+        usedModel='DeepSeek（仅文字特征）';
+      }
+    } else {
+      text=await callAI(prompt,SYS_INFER,2800);
+    }
+    if(infResult){
+      const tag=hasImage&&currentModel==='glm'?'🖼 ':'';
+      infResult.innerHTML='<div style="font-size:11px;color:#5d6b7d;margin-bottom:10px">'+tag+usedModel+' · 药性推断 · '+new Date().toLocaleTimeString('zh-CN')+'</div>'+mdToHtml(text);
+    }
+  }catch(err){
+    if(infResult)infResult.innerHTML=renderAIError(err);
+  }
+};
+
+function renderAIError(err){
+  const msg=String(err.message||err);
+  if(msg==='NO_KEY')return'<div class="err">请先填写 API Key。</div>';
+  return'<div class="err"><strong>请求失败</strong><br><br>'+escapeHtml(msg)+'<br><br><strong>常见原因：</strong><br>· 浏览器跨域（CORS）限制 —— 可在「AI 对比」面板填写代理地址<br>· API Key 无效或余额不足<br>· 网络不通<br>· 图片过大（建议 &lt;5MB）</div>';
+}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function mdToHtml(md){
+  let s=escapeHtml(md);
+  s=s.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  s=s.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  s=s.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/`(.+?)`/g,'<code>$1</code>');
+  s=s.replace(/^\s*[-*·]\s+(.+)$/gm,'<li>$1</li>');
+  s=s.replace(/^\s*\d+\.\s+(.+)$/gm,'<li>$1</li>');
+  s=s.replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g,'<ul>$1</ul>');
+  s=s.replace(/<\/ul>\s*<ul>/g,'');
+  s=s.split(/\n{2,}/).map(block=>{
+    const t=block.trim();if(!t)return'';
+    if(/^<(h1|h2|h3|ul|ol|li|pre|blockquote|div)/.test(t))return t;
+    return'<p>'+t.replace(/\n/g,'<br>')+'</p>';
+  }).join('');
+  return s;
+}
+
+/* ========== 14. 图谱导出 / 导入 ========== */
+function exportGraph(){
+  const data={
+    app:'herb-atlas',
+    version:'1.0',
+    exportedAt:new Date().toISOString(),
+    count:HERBS.length,
+    herbs:HERBS
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const ts=new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  a.href=url;
+  a.download='herb-atlas-'+ts+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('已导出 '+HERBS.length+' 味药到文件');
+}
+function sanitizeHerb(h){
+  if(!h||typeof h!=='object')return null;
+  const name=h.name?String(h.name).trim():'';
+  if(!name)return null;
+  const baseId=name.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g,'').toLowerCase()||('h'+Math.random().toString(36).slice(2,8));
+  return{
+    id:h.id&&String(h.id).trim()?String(h.id).trim():baseId,
+    name:name,
+    short:h.short?String(h.short).charAt(0):name.charAt(0),
+    family:h.family?String(h.family):'未知',
+    part:h.part?String(h.part):'未知',
+    nature:h.nature?String(h.nature):'待确认',
+    meridians:Array.isArray(h.meridians)&&h.meridians.length?h.meridians.map(String):['待确认'],
+    effects:Array.isArray(h.effects)&&h.effects.length?h.effects.map(String):['待确认'],
+    compounds:Array.isArray(h.compounds)&&h.compounds.length?h.compounds.map(String):['待确认'],
+    pharma:Array.isArray(h.pharma)&&h.pharma.length?h.pharma.map(String):['待确认'],
+    indications:Array.isArray(h.indications)?h.indications.map(String):[],
+    dosage:h.dosage?String(h.dosage):'',
+    warnings:Array.isArray(h.warnings)?h.warnings.map(String):[],
+    source:h.source?String(h.source):'外部导入'
+  };
+}
+function resetGraph(newHerbs){
+  // 清空数据（原地修改以保留引用）
+  HERBS.length=0;
+  newHerbs.forEach(h=>HERBS.push(h));
+  // 清空图谱
+  nodes.length=0;
+  edges.length=0;
+  nodeIndex.clear();
+  expanded.clear();
+  // 重建
+  buildGraph();
+  buildLegend();
+  selectNode(null);
+  fitView();
+}
+async function importGraphFromFile(file){
+  try{
+    const text=await file.text();
+    let data;
+    try{data=JSON.parse(text);}
+    catch(e){throw new Error('JSON 解析失败，文件可能已损坏');}
+    let herbs=null;
+    if(Array.isArray(data))herbs=data;
+    else if(data&&Array.isArray(data.herbs))herbs=data.herbs;
+    if(!herbs||!herbs.length)throw new Error('文件中没有找到药物数据');
+    const cleaned=herbs.map(sanitizeHerb).filter(Boolean);
+    if(!cleaned.length)throw new Error('文件中没有有效的药物条目');
+    // 处理 ID 冲突
+    const seen=new Set();
+    cleaned.forEach(h=>{
+      let base=h.id,c=1;
+      while(seen.has(h.id)){h.id=base+'_'+c;c++;}
+      seen.add(h.id);
+    });
+    if(!confirm('将从文件导入 '+cleaned.length+' 味药，覆盖当前图谱（共 '+HERBS.length+' 味）。是否继续？'))return;
+    resetGraph(cleaned);
+    toast('成功导入 '+cleaned.length+' 味药');
+  }catch(err){
+    console.error('导入失败:',err);
+    toast('导入失败：'+(err.message||err));
+  }
+}
+document.getElementById('btnExport').onclick=exportGraph;
+const fileLoadInput=document.getElementById('fileLoad');
+document.getElementById('btnLoad').onclick=()=>{if(fileLoadInput)fileLoadInput.click();};
+if(fileLoadInput)fileLoadInput.onchange=()=>{
+  const f=fileLoadInput.files&&fileLoadInput.files[0];
+  if(f){importGraphFromFile(f);}
+  fileLoadInput.value='';
+};
+
+/* ========== 15. 药典文本解析（规则 + AI） ========== */
+function parsePharmacopoeiaText(text){
+  const result={name:'',family:'',part:'',nature:'',meridians:[],effects:[],indications:[],compounds:[],pharma:[],warnings:[],dosage:'',short:'药',source:''};
+  if(!text||!text.trim())return result;
+  let t=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const firstLine=t.split('\n')[0].trim();
+  const nameMatch=firstLine.match(/^([^（(【〖\s]+)/);
+  if(nameMatch&&nameMatch[1].length<=12){result.name=nameMatch[1].trim();}
+  else{const altMatch=t.match(/^[\s\n]*([^\n〖【]+?)(?:\s+[A-Z]|\n)/);if(altMatch){let raw=altMatch[1].trim();const aliasMatch=raw.match(/^([^（(]+)/);if(aliasMatch)raw=aliasMatch[1].trim();result.name=raw;}}
+  if(result.name)result.short=result.name.charAt(0);
+  const famMatch=t.match(/([^\s，。；、]+科)\s*(?:植物|属)/)||t.match(/本品为\s*([^\s]+科)/);
+  if(famMatch)result.family=famMatch[1].trim();
+  const sourceMatch=t.match(/本品为[\s\S]{0,200}?的\s*(干燥[^\s，。；、]+)/);
+  if(sourceMatch)result.part=sourceMatch[1].replace(/^干燥/,'');
+  else{const partMatch=t.match(/干燥([^\s，。；、]+)/);if(partMatch)result.part=partMatch[1];}
+  const natureMatch=t.match(/〖性味与归经〗\s*([^〖〗\n]+(?:\n[^〖〗\n]+)*)/);
+  if(natureMatch){
+    let natureText=natureMatch[1].replace(/\s+/g,'');
+    const guiMatch=natureText.match(/归\s*([^。；]+)经/);
+    if(guiMatch){result.meridians=guiMatch[1].split(/[、,，]/).map(s=>s.trim()).filter(Boolean);natureText=natureText.replace(/归\s*[^。；]+经/,'');}
+    natureText=natureText.replace(/^[，,、]+/,'').replace(/[，,、]+$/,'');
+    result.nature=natureText;
+  }
+  const effectMatch=t.match(/〖功能与主治〗\s*([^〖〗\n]+(?:\n[^〖〗\n]+)*)/);
+  if(effectMatch){
+    let effectText=effectMatch[1].replace(/\s+/g,'');
+    const parts=effectText.split(/用于/);
+    const funcPart=parts[0].split(/[。；]/)[0];
+    result.effects=funcPart.split(/[，,、]/).map(s=>s.trim()).filter(s=>s.length>0&&s.length<12);
+    if(parts[1]){
+      const indStr=parts[1].split(/[。；]/)[0];
+      result.indications=indStr.split(/[，,、]/).map(s=>s.trim()).filter(Boolean).slice(0,6);
+    }
+  }
+  const dosageMatch=t.match(/〖用法与用量〗\s*([^〖〗\n]+)/);
+  if(dosageMatch)result.dosage=dosageMatch[1].trim().slice(0,30);
+  const contentMatch=t.match(/〖含量测定〗[\s\S]*?(?=〖|$)/);
+  if(contentMatch){
+    const contentText=contentMatch[0];
+    const compoundRegex=/含\s*([\u4e00-\u9fa5][\u4e00-\u9fa5A-Za-z0-9\-]*?(?:素|苷|酸|碱|酚|酮|醇|酯|多糖|皂苷|黄酮|生物碱|挥发油))/g;
+    let m;const seen=new Set();
+    while((m=compoundRegex.exec(contentText))!==null){const c=m[1].trim();if(c.length>1&&c.length<20&&!seen.has(c)){seen.add(c);result.compounds.push(c);}}
+  }
+  result.pharma=inferPharmaFromEffects(result.effects,result.compounds);
+  if(!result.name)result.name='';
+  if(!result.short&&result.name)result.short=result.name.charAt(0);
+  result.source='药典正文（规则解析）';
+  return result;
+}
+function inferPharmaFromEffects(effects,compounds){
+  const pharma=new Set();
+  const effectStr=(effects||[]).join('')+(compounds||[]).join('');
+  const MAP=[
+    {keys:['清热','解毒','泻火'],pharma:['抗炎','抗菌','抗病毒']},
+    {keys:['活血','化瘀','通经'],pharma:['抗凝血','改善微循环','抗血栓']},
+    {keys:['补气','益气','健脾'],pharma:['增强免疫','抗疲劳','调节胃肠']},
+    {keys:['补血','养血'],pharma:['促进造血','调节免疫']},
+    {keys:['止咳','平喘','化痰'],pharma:['镇咳','祛痰','平喘']},
+    {keys:['安神','宁心','镇静'],pharma:['镇静催眠','抗焦虑']},
+    {keys:['利水','渗湿','利尿'],pharma:['利尿','调节水盐代谢']},
+    {keys:['止痛','镇痛'],pharma:['镇痛','抗炎']},
+    {keys:['收敛','固涩'],pharma:['收敛','保护黏膜']},
+    {keys:['滋阴','养阴'],pharma:['调节免疫','抗氧化']},
+    {keys:['温中','散寒'],pharma:['温中','保护胃黏膜','抗炎']},
+    {keys:['疏肝','解郁'],pharma:['调节内分泌','抗焦虑','保肝']},
+    {keys:['消食','健胃'],pharma:['促消化','调节胃肠']},
+    {keys:['凉血','止血'],pharma:['止血','抗炎']},
+    {keys:['软坚','散结'],pharma:['抗肿瘤','调节免疫']}
+  ];
+  for(const m of MAP){if(m.keys.some(k=>effectStr.includes(k)))m.pharma.forEach(p=>pharma.add(p));}
+  if(compounds.some(c=>c.includes('皂苷')))pharma.add('调节免疫');
+  if(compounds.some(c=>c.includes('多糖')))pharma.add('增强免疫');
+  if(compounds.some(c=>c.includes('黄酮')))pharma.add('抗氧化');
+  if(compounds.some(c=>c.includes('生物碱')))pharma.add('抗菌');
+  return[...pharma].slice(0,6);
+}
+function parseAIJson(raw){
+  let s=String(raw).trim();
+  s=s.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+  const start=s.indexOf('{'),end=s.lastIndexOf('}');
+  if(start<0||end<0)throw new Error('AI 未返回 JSON 结构');
+  s=s.slice(start,end+1);
+  let obj;
+  try{obj=JSON.parse(s);}
+  catch(e){
+    s=s.replace(/,\s*([}\]])/g,'$1');
+    try{obj=JSON.parse(s);}catch(e2){throw new Error('AI 返回的 JSON 格式有误：'+e2.message);}
+  }
+  if(!obj.herbs||!Array.isArray(obj.herbs))throw new Error('AI 返回结构缺少 herbs 数组');
+  return obj.herbs;
+}
+async function aiParsePharmacopoeia(text){
+  const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
+  if(!apiKey)throw new Error('NO_KEY');
+  const name=modelLabel();
+  const raw=await callAI(buildParsePrompt(text),SYS_PARSE,3600);
+  return{herbs:parseAIJson(raw),model:name};
+}
+
+/* ========== 16. 导入模态窗口 ========== */
+const importModal=document.getElementById('importModal'),importText=document.getElementById('importText');
+const importPreview=document.getElementById('importPreview'),ipGrid=document.getElementById('ipGrid');
+const importWarn=document.getElementById('importWarn'),btnConfirmImport=document.getElementById('btnConfirmImport');
+const previewBadge=document.getElementById('previewBadge');
+const multiList=document.getElementById('multiList');
+const importInfo=document.getElementById('importInfo');
+const manualNameInput=document.getElementById('manualName');
+const nameRow=document.getElementById('nameRow');
+const nameTip=document.getElementById('nameTip');
+
+let parsedResult=null;
+let parsedList=null;
+let parseMode='rule';
+let parseTimer=null;
+let previewSource='rule';
+
+function openImportModal(){
+  if(!importModal)return;
+  importModal.classList.add('show');
+  if(importText)importText.value='';
+  resetImportState();
+  setTimeout(()=>{if(importText)importText.focus();},150);
+}
+function resetImportState(){
+  if(importPreview)importPreview.classList.remove('show');
+  if(importWarn)importWarn.classList.remove('show');
+  if(multiList){multiList.classList.remove('show');multiList.innerHTML='';}
+  if(btnConfirmImport)btnConfirmImport.disabled=true;
+  if(importInfo)importInfo.textContent='';
+  parsedResult=null;parsedList=null;
+  updateNameRow(null);
+}
+function closeImportModal(){if(importModal)importModal.classList.remove('show');}
+function updateNameRow(parsed){
+  if(!nameRow||!manualNameInput)return;
+  nameRow.classList.remove('ok','err');
+  if(!parsed){
+    manualNameInput.value='';
+    manualNameInput.disabled=false;
+    if(nameTip)nameTip.textContent='自动识别';
+    return;
+  }
+  if(parsed.name){
+    manualNameInput.value=parsed.name;
+    manualNameInput.disabled=false;
+    nameRow.classList.add('ok');
+    if(nameTip)nameTip.textContent='已自动识别';
+  } else {
+    manualNameInput.value='';
+    manualNameInput.disabled=false;
+    nameRow.classList.add('err');
+    if(nameTip)nameTip.textContent='需要手动输入';
+  }
+}
+document.getElementById('btnImport').onclick=openImportModal;
+document.getElementById('btnCloseImport').onclick=closeImportModal;
+document.getElementById('btnCancelImport').onclick=closeImportModal;
+if(importModal)importModal.addEventListener('click',e=>{if(e.target===importModal)closeImportModal();});
+
+document.querySelectorAll('.pm').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.pm').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    parseMode=btn.dataset.mode;
+    if(parseMode==='ai'){
+      const text=importText.value.trim();
+      if(text.length>=10)doAIParse(text);
+      else{resetImportState();if(importInfo)importInfo.textContent='请先粘贴药典正文';}
+    } else {
+      const text=importText.value.trim();
+      if(text.length>=10)doRuleParse(text);
+      else resetImportState();
+    }
+  };
+});
+
+function doRuleParse(text){
+  try{
+    const parsed=parsePharmacopoeiaText(text);
+    parsedResult=parsed;parsedList=null;previewSource='rule';
+    renderPreview(parsed,'rule');
+    updateNameRow(parsed);
+    if(btnConfirmImport)btnConfirmImport.disabled=false;
+  }catch(err){
+    showImportWarn('⚠ 解析出错：'+escapeHtml(String(err.message||err)));
+  }
+}
+async function doAIParse(text){
+  const apiKey=apiKeyInput?apiKeyInput.value.trim():'';
+  if(!apiKey){
+    showImportWarn('⚠ AI 解析需要 API Key。请先在「AI 对比」面板中填入 Key，或切换回「快速规则解析」。');
+    if(previewBadge){previewBadge.textContent='等待 API Key';previewBadge.className='badge ai';}
+    return;
+  }
+  resetImportState();
+  if(importInfo)importInfo.textContent=modelLabel()+' 正在解析…';
+  if(previewBadge){previewBadge.textContent='AI 解析中';previewBadge.className='badge ai';}
+  if(importPreview)importPreview.classList.add('show');
+  if(ipGrid)ipGrid.innerHTML='<div class="loading" style="grid-column:span 2"><div class="spin"></div>'+modelLabel()+' 正在智能解析药典文本…</div>';
+  try{
+    const{herbs,model}=await aiParsePharmacopoeia(text);
+    if(!herbs.length)throw new Error('AI 未识别出任何药物');
+    parsedList=herbs;
+    parsedResult=herbs[0];
+    previewSource='ai';
+    if(previewBadge){previewBadge.textContent='AI 解析 · '+model;previewBadge.className='badge ai';}
+    renderPreview(herbs[0],'ai');
+    updateNameRow(herbs[0]);
+    renderMultiList(herbs);
+    if(importInfo)importInfo.textContent='共识别 '+herbs.length+' 味药';
+    if(btnConfirmImport)btnConfirmImport.disabled=false;
+  }catch(err){
+    if(ipGrid)ipGrid.innerHTML='';
+    if(importPreview)importPreview.classList.remove('show');
+    if(previewBadge){previewBadge.textContent='AI 解析失败';previewBadge.className='badge ai';}
+    showImportWarn(renderAIError(err));
+  }
+}
+function renderPreview(parsed,source){
+  const fields=[
+    ['名称',parsed.name||'—'],
+    ['科属',parsed.family||'—'],
+    ['部位',parsed.part||'—'],
+    ['性味',parsed.nature||'—'],
+    ['归经',(parsed.meridians&&parsed.meridians.length)?parsed.meridians.join('、')+'经':'—'],
+    ['功效',(parsed.effects&&parsed.effects.length)?parsed.effects.join('、'):'—'],
+    ['主治',(parsed.indications&&parsed.indications.length)?parsed.indications.join('、'):'—'],
+    ['成分',(parsed.compounds&&parsed.compounds.length)?parsed.compounds.join('、'):'—'],
+    ['药理',(parsed.pharma&&parsed.pharma.length)?parsed.pharma.join('、'):'—'],
+    ['用量',parsed.dosage||'—']
+  ];
+  if(ipGrid)ipGrid.innerHTML=fields.map(f=>'<div class="ip-item"><span class="ip-key">'+f[0]+'</span><span class="ip-val">'+escapeHtml(f[1])+'</span></div>').join('');
+  if(importPreview)importPreview.classList.add('show');
+  if(previewBadge&&source==='rule'){previewBadge.textContent='规则引擎';previewBadge.className='badge rule';}
+  const warns=[];
+  if(!parsed.name)warns.push('未识别到药名，请在「药物名称」输入框中手动填写。');
+  if(!parsed.family)warns.push('未能识别科属。');
+  if(!parsed.nature)warns.push('未能识别性味归经。');
+  if(!parsed.effects||!parsed.effects.length)warns.push('未能识别功效信息。');
+  if(parsed.warnings&&parsed.warnings.length)warns.push(parsed.warnings.join('；'));
+  if(warns.length)showImportWarn('⚠ '+warns.join('<br>⚠ '));
+  else if(importWarn)importWarn.classList.remove('show');
+}
+function renderMultiList(herbs){
+  if(!multiList)return;
+  if(herbs.length<=1){multiList.classList.remove('show');multiList.innerHTML='';return;}
+  let html='<h5>识别到 '+herbs.length+' 味药，取消勾选可排除</h5>';
+  herbs.forEach((h,i)=>{
+    html+='<div class="multi-item"><input type="checkbox" class="mi-check" data-idx="'+i+'" checked>';
+    html+='<span class="mi-name">'+(h.name||'未命名')+'</span>';
+    html+='<span class="mi-meta">'+(h.family||'—')+' · '+(h.part||'—')+' · '+(h.nature||'—')+'</span>';
+    html+='</div>';
+  });
+  multiList.innerHTML=html;
+  multiList.classList.add('show');
+}
+function showImportWarn(html){
+  if(!importWarn)return;
+  importWarn.innerHTML=html;
+  importWarn.classList.add('show');
+}
+if(importText){
+  importText.addEventListener('input',()=>{
+    clearTimeout(parseTimer);
+    parseTimer=setTimeout(()=>{
+      const text=importText.value.trim();
+      if(text.length<10){resetImportState();return;}
+      if(parseMode==='ai')doAIParse(text);
+      else doRuleParse(text);
+    },parseMode==='ai'?600:280);
+  });
+}
+if(manualNameInput){
+  manualNameInput.addEventListener('input',()=>{
+    const v=manualNameInput.value.trim();
+    if(parsedResult){
+      parsedResult.name=v;
+      if(v)parsedResult.short=v.charAt(0);
+    }
+    if(nameRow){
+      nameRow.classList.remove('ok','err');
+      if(v){nameRow.classList.add('ok');if(nameTip)nameTip.textContent='已填写';}
+      else{nameRow.classList.add('err');if(nameTip)nameTip.textContent='需要手动输入';}
+    }
+    if(btnConfirmImport)btnConfirmImport.disabled=!v && !(parsedResult&&parsedResult.name);
+    if(parsedResult)renderPreview(parsedResult,previewSource);
+  });
+}
+const btnAIParse=document.getElementById('btnAIParse');
+if(btnAIParse){
+  btnAIParse.onclick=()=>{
+    const text=importText.value.trim();
+    if(text.length<10){toast('请先粘贴药典正文');return;}
+    document.querySelectorAll('.pm').forEach(x=>x.classList.toggle('active',x.dataset.mode==='ai'));
+    parseMode='ai';
+    doAIParse(text);
+  };
+}
+if(btnConfirmImport){
+  btnConfirmImport.onclick=async()=>{
+    try{
+      let list=[];
+      if(parsedList&&parsedList.length){
+        if(parsedList.length===1){
+          list=[parsedList[0]];
+        } else {
+          const checks=multiList?multiList.querySelectorAll('.mi-check'):[];
+          const checkedIdx=new Set();
+          checks.forEach(c=>{if(c.checked)checkedIdx.add(parseInt(c.dataset.idx,10));});
+          if(checkedIdx.size===0)list=parsedList.slice();
+          else list=parsedList.filter((_,i)=>checkedIdx.has(i));
+        }
+      } else if(parsedResult){
+        list=[parsedResult];
+      } else {
+        toast('没有可导入的数据，请先粘贴药典正文并等待解析完成');
+        return;
+      }
+      const manualName=(manualNameInput?manualNameInput.value.trim():'');
+      if(manualName){
+        if(list.length===1){
+          list[0].name=manualName;
+          if(!list[0].short)list[0].short=manualName.charAt(0);
+        } else {
+          list.forEach(p=>{if(!p.name){p.name=manualName;p.short=manualName.charAt(0);}});
+        }
+      }
+      list=list.filter(p=>p&&p.name);
+      if(!list.length){
+        toast('请至少提供一味药的名称');
+        if(nameRow){nameRow.classList.add('err');nameRow.classList.remove('ok');if(nameTip)nameTip.textContent='请填写药名';if(manualNameInput)manualNameInput.focus();}
+        return;
+      }
+      let added=0,skipped=0;
+      const addedIds=[];
+      for(const p of list){
+        try{
+          const herb=importHerbFromParsed(p);
+          added++;addedIds.push(herb.id);
+        }catch(e){console.error('导入失败:',e,p);skipped++;}
+      }
+      closeImportModal();
+      buildLegend();
+      if(added){
+        toast('成功添加 '+added+' 味药'+(skipped?'，跳过 '+skipped+' 条':''));
+        setTimeout(()=>{
+          const n=nodeIndex.get('herb:'+addedIds[addedIds.length-1]);
+          if(n){focusNode(n);selectNode(n);cam.zoom=Math.min(cam.zoom,1.0);}
+        },120);
+      } else {
+        toast('未能导入任何药物，请检查文本格式');
+      }
+    }catch(err){
+      console.error('导入过程出错:',err);
+      toast('导入失败：'+(err.message||err));
+    }
+  };
+}
+function importHerbFromParsed(parsed){
+  if(!parsed.name)throw new Error('药物名称为空');
+  const baseId=parsed.name.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g,'').toLowerCase()||('herb_'+Date.now());
+  let id=baseId,counter=1;
+  while(HERBS.find(h=>h.id===id)){id=baseId+'_'+counter;counter++;}
+  const herb={
+    id:id,
+    name:parsed.name,
+    short:parsed.short||parsed.name.charAt(0)||'药',
+    family:parsed.family||'未知',
+    part:parsed.part||'未知',
+    nature:parsed.nature||'待确认',
+    meridians:(parsed.meridians&&parsed.meridians.length)?parsed.meridians:['待确认'],
+    effects:(parsed.effects&&parsed.effects.length)?parsed.effects:['待确认'],
+    compounds:(parsed.compounds&&parsed.compounds.length)?parsed.compounds:['待确认'],
+    pharma:(parsed.pharma&&parsed.pharma.length)?parsed.pharma:['待确认'],
+    indications:parsed.indications||[],
+    dosage:parsed.dosage||'',
+    warnings:parsed.warnings||[],
+    source:parsed.source||'药典导入'
+  };
+  HERBS.push(herb);
+  addHerbToGraph(herb,HERBS.length-1,HERBS.length);
+  return herb;
+}
+
+/* ========== 17. Toast & 启动 ========== */
+let toastTimer=null;
+const toastEl=document.getElementById('toast');
+function toast(msg){if(!toastEl)return;toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),2600);}
+window.addEventListener('error',e=>console.error('本草图谱错误:',e.message,e.filename,e.lineno));
+function init(){
+  try{
+    resize();buildGraph();buildLegend();buildInferForm();fitView();tick();
+    updateImagePreview();
+    setTimeout(()=>{cam.zoom*=0.92;},400);
+  }
+  catch(err){console.error('初始化失败:',err);toast('初始化出错，请查看控制台');}
+}
+window.addEventListener('resize',()=>{resize();});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+</script>
+</body>
+</html>
